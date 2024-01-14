@@ -1,0 +1,36 @@
+*[name='btngen']{
+	display: block;
+}
+
+@media screen and (max-width: 700px) {
+  *[name='slinn'], *[name='pypi'], *[name='miotproject'], *[name='homepage']{
+    min-width: 200px;
+    display: block;
+    text-align: center;
+  }
+
+  *[name='header']{
+    display: block;
+  }
+}
+
+@media screen and (min-width: 500px){
+  *[name='header']{
+    min-width: 450px;
+  }
+}
+
+@media screen and (max-width: 500px){
+  *[name='header']{
+    max-width: 450px;
+  }
+}
+
+*[name='body']{
+  max-width: 450px;
+  display: block;
+}
+
+*[name='footer'] *{
+  display: block;
+}
