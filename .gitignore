@@ -2,3 +2,4 @@ slinn.egg-info/
 slinnold/
 test/
 dist/
+*/__pycache__/

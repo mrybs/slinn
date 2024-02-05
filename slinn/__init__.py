@@ -7,4 +7,4 @@ from slinn.http_api_response import HttpAPIResponse
 from slinn.server import Server
 from slinn.dispatcher import Dispatcher
 
-version = 'Slinn v1.2.0 130124a from https://pypi.org/project/slinn/1.2.0'
+version = 'Slinn v1.2.1 050224b'

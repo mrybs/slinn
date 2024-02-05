@@ -35,7 +35,7 @@ class Server:
 			while True:
 				if not self.waiting:
 					threading.Thread(target=self.handle_request).start()
-					time.sleep(0.15)
+				time.sleep(0.1)
 		except KeyboardInterrupt:
 			print('Got KeyboardInterrupt, halting the application...')
 			os._exit(0)

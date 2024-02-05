@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='slinn',
-      version='1.2.0',
+      version='1.2.1',
       description='HTTPS and HTTP server framework',
       packages=['slinn', 'slinn.default', 'slinn.templates', 'slinn.templates.firstrun'],
       package_data={'slinn.templates.firstrun': ['data/*.css', 'data/*.html']},
