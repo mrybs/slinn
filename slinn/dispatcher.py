@@ -6,7 +6,7 @@ class Dispatcher:
 		self.handles = []
 		self.hosts = hosts if list(hosts) != [] else ['.*']
 		
-	def route(self, filter: Filter):
+	def __call__(self, filter: Filter):
 		def decorator(func):
 			self.handles.append(Server.Handle(filter, func))
 		return decorator	

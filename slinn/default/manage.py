@@ -144,24 +144,26 @@ def main():
 			ensure_appname = replace_all(args['name'], '-&$#!@%^().,', '_')
 			if os.path.isdir(ensure_appname):
 				return print(f'{BLUE}The app named {args["name"]} exists{RESET}')
+			if 'host' not in args.keys():
+				print(f'{BLUE}Hosts were not specified')
 			os.mkdir(ensure_appname)
 			with open(f'{ensure_appname}/__init__.py', 'w') as f:
-				data = """from %appname%.app import dp_%appname%
+				data = """from %appname%.app import dp as dp_%appname%
 """.replace('%appname%', ensure_appname)
 				f.write(data)
 			with open(f'{ensure_appname}/app.py', 'w') as f:
 				data = """from slinn import Dispatcher, Filter, HttpResponse
  
-dp_%appname% = Dispatcher(%host%)
+dp = Dispatcher(%hosts%)
 
 # Write your code down here                         
-""".replace('%appname%', ensure_appname).replace('%host%', '' if 'host' not in args.keys() else ', '.join(add_quotes_to_list(args['host'] if type(args['host']) == list else [args['host']])))
+""".replace('%appname%', ensure_appname).replace('%hosts%', '' if 'host' not in args.keys() else ', '.join(add_quotes_to_list(args['host'] if type(args['host']) == list else [args['host']])))
 				f.write(data)
 			fr = open('project.json', 'r')
 			fj = json.loads(fr.read())
 			fr.close()
 			if 'apps' in fj.keys():
-				fj['apps'].append(ensure_appname)
+				fj['apps'].insert(0, ensure_appname)
 			else:
 				fj['apps'] = []
 			fw = open('project.json', 'w')

@@ -1,1 +1,1 @@
-from firstrun.app import dp_firstrun
+from firstrun.app import dp as dp_firstrun
