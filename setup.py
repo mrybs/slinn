@@ -4,7 +4,7 @@ def readme():
     with open('README.md', 'r') as f:
         return f.read()
     
-templates = ['firstrun']
+templates = ['firstrun', 'example']
 
 
 setup(name='slinn',

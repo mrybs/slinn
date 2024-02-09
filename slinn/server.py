@@ -52,7 +52,7 @@ class Server:
 			self.waiting = False
 			try:
 				request = Request(client_socket.recv(8192).decode(), client_address)
-				print(f'{GRAY}[{request.method}]{RESET} request {request.full_link} from {"" if "." in request.ip else "["}{request.ip}{"" if "." in request.ip else "]"}:{request.port} on {request.host}')
+				print(f'{self.GRAY}[{request.method}]{self.RESET} request {request.full_link} from {"" if "." in request.ip else "["}{request.ip}{"" if "." in request.ip else "]"}:{request.port} on {request.host}')
 			except UnicodeDecodeError:
 				return
 			for dispatcher in self.dispatchers:
