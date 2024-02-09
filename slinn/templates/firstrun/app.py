@@ -1,7 +1,7 @@
 from slinn import Dispatcher, Filter, HttpResponse
 import slinn
  
-dp = Dispatcher('.*')
+dp = Dispatcher()
 
 def read(filename):
     file = open(filename, 'r')

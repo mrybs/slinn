@@ -20,7 +20,7 @@ if __name__ == '__main__':
 			else:
 				print(f'{BLUE}{apppath} has already existed{RESET}')
 			shutil.copyfile(modulepath+'default/manage.py', f'{apppath}/manage.py')
-			shutil.copyfile(modulepath+'default/project.json.py', f'{apppath}/project.json')
+			shutil.copyfile(modulepath+'default/project.json', f'{apppath}/project.json')
 			venv.create(f'{apppath}/venv')
 			packages_dir = ''
 			if platform.system() == 'Windows':

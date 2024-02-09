@@ -1,0 +1,1 @@
+from example.app import dp as dp_example

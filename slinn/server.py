@@ -7,6 +7,9 @@ class Server:
 		def __init__(self, filter, function):
 			self.filter = filter
 			self.function = function
+
+	RESET = '\u001b[0m'
+	GRAY = '\u001b[38;2;127;127;127m'
 	
 	def __init__(self, *dispatchers, ssl_fullchain: str=None, ssl_key: str=None, http_ver: str='2.0'):
 		self.dispatchers = dispatchers
@@ -49,7 +52,7 @@ class Server:
 			self.waiting = False
 			try:
 				request = Request(client_socket.recv(8192).decode(), client_address)
-				print(f'{request.method} request {request.full_link} from {request.ip}:{request.port} on {request.host}')
+				print(f'{GRAY}[{request.method}]{RESET} request {request.full_link} from {"" if "." in request.ip else "["}{request.ip}{"" if "." in request.ip else "]"}:{request.port} on {request.host}')
 			except UnicodeDecodeError:
 				return
 			for dispatcher in self.dispatchers:

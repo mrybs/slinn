@@ -20,23 +20,24 @@ py manage.py run
 
 #### Simple example
 ```python
-from slinn import Server, Dispatcher, Filter, HttpResponse, Address
+from slinn import Server, Dispatcher, AnyFilter, LinkFilter, HttpResponse, HttpAPIResponse, Address
 
 
 dp = Dispatcher()
 
 
-@dp.route(Filter('/api.*'))
+@dp(LinkFilter('api'))
 def api(request):
     return HttpAPIResponse('{"status": "ok"}')
 
 
-@dp.route(Filter('.*'))
+@dp(AnyFilter)
 def helloworld(request):
      return HttpResponse('Hello world!')
 
 # The following code is not required when using manage.py
-app = Server(dp, ssl_cert='fullchain.pem', ssl_key='key.pem')
+app = Server(dp) # HTTP
+# app = Server(dp, ssl_cert='fullchain.pem', ssl_key='key.pem') # HTTPS
 app.listen(Address(8080))
 
 ```
@@ -44,7 +45,7 @@ app.listen(Address(8080))
 #### Functions:
 ```python
 Server(self, *dispatchers, ssl_cert: str=None, ssl_key: str=None, http_ver: str='2.0')
-Server.listen(self, address: Address)
+server.listen(self, address: Address)
 ```
 
 ```python
@@ -53,28 +54,24 @@ Address(self, port: int, host: str=None)
 
 ```python
 Dispatcher(self, hosts: list=None)
-Dispatcher.route(self, filter: Filter)
+dispatcher.route(self, filter: Filter)
 ```
 
 ```python
 Filter(self, filter: str, methods: list[str]=None)
-Filter.check(self, text: str, method: str) -> bool
+_filter.check(self, text: str, method: str) -> bool
 ```
 
 ```python
 HttpResponse(self, payload, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')
 HttpResponse.set_cookie(self, key: str, value)
 HttpResponse.make(self, type: str='HTTP/2.0') -> str
-```
 
-```python
 HttpAPIResponse(self, payload, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')
-HttpAPIResponse.set_cookie(self, key: str, value)
-HttpAPIResponse.make(self, type: str='HTTP/2.0') -> str
-```
+httpAPIResponse.set_cookie(self, key: str, value)
+httpAPIResponse.make(self, type: str='HTTP/2.0') -> str
 
-HttpRedirect inherits from HttpResponse
-```python
+# HttpRedirect inherits from HttpResponse
 HttpRedirect(self, location: str)
 ```
 
