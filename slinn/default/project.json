@@ -1,6 +1,7 @@
 {
     "host": "localhost",
     "port": 8080,
+    "debug": true,
     "ssl": {
         "fullchain": false,
         "key": false

@@ -66,3 +66,8 @@ if __name__ == '__main__':
 			shutil.copytree(modulepath, packages_dir+'/slinn')
 			shutil.copyfile(modulepath+'default/manage.py', f'{apppath}/manage.py')
 			print(f'{GREEN}Project has updated{RESET}')
+		else:
+			print(f'{RED}Command {sys.argv[1].lower()} is not exists{RESET}')
+	else:
+		print(f'{RED}Command was not specified{RESET}')
+

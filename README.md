@@ -35,17 +35,17 @@ def api(request):
 def helloworld(request):
      return HttpResponse('Hello world!')
 
-# The following code is not required when using manage.py
-app = Server(dp) # HTTP
-# app = Server(dp, ssl_cert='fullchain.pem', ssl_key='key.pem') # HTTPS
-app.listen(Address(8080))
-
 ```
+
+To config project you should edit `./project.json`
+To config app you should edit `./appname/config.json`
 
 #### Functions:
 ```python
-Server(self, *dispatchers, ssl_cert: str=None, ssl_key: str=None, http_ver: str='2.0')
-server.listen(self, address: Address)
+Server(*dispatchers, ssl_cert: str=None, ssl_key: str=None, http_ver: str='2.0')
+server.address() -> str
+server.reload(*dispatchers)
+server.listen(address: Address)
 ```
 
 ```python
@@ -60,6 +60,12 @@ dispatcher.route(self, filter: Filter)
 ```python
 Filter(self, filter: str, methods: list[str]=None)
 _filter.check(self, text: str, method: str) -> bool
+
+# LinkFilter inherits from Filter
+LinkFilter(self, filter: str, methods: list[str]=None)
+link_filter.check(self, text: str, method: str) -> bool
+
+# AnyFilter as same as Filter('.*')
 ```
 
 ```python

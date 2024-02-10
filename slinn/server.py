@@ -19,6 +19,12 @@ class Server:
 		self.ssl_context = None
 		self.http_ver = http_ver
 		self.waiting = False
+
+	def reload(self, *dispatchers):
+		self.dispatchers = dispatchers
+
+	def address(self):
+		return f'HTTP{"S" if self.ssl else ""} server is available on http{"s" if self.ssl else ""}://{"" if "." in self.host else "["}{self.host}{"" if "." in self.host else "]"}{(":"+str(self.port) if self.port != 443 else "") if self.ssl else (":"+str(self.port )if self.port != 80 else "")}/'
 		
 	def listen(self, address: Address):		
 		self.host, self.port = address.host, address.port
@@ -33,7 +39,7 @@ class Server:
 			self.ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
 			self.ssl_context.load_cert_chain(certfile=self.ssl_cert, keyfile=self.ssl_key)
 		self.server_socket.listen()
-		print(f'HTTP{"S" if self.ssl else ""} server is available on http{"s" if self.ssl else ""}://{"" if "." in self.host else "["}{self.host}{"" if "." in self.host else "]"}{(":"+str(self.port) if self.port != 443 else "") if self.ssl else (":"+str(self.port )if self.port != 80 else "")}/')
+		print(self.address())
 		try:
 			while True:
 				if not self.waiting:

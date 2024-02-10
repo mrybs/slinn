@@ -1,5 +1,6 @@
 import sys, os, shutil, json, base64
 from slinn import version as slinn_version
+import slinn
 
 RED = '\u001b[31m'
 GREEN = '\u001b[32m'
@@ -104,29 +105,44 @@ def main():
 		if sys.argv[1].lower() == 'run':
 			from slinn import Server, Address
 
-
 			def config():
 				file = open('project.json')
 				cfg = json.loads(file.read())
 				file.close()
 				return cfg
+			
+			def app_config(app):
+				try:
+					cfg = {"debug": False}
+					file = open(f'{app}/config.json')
+					cfg.update(json.loads(file.read()))
+					file.close()
+					return cfg
+				except FileNotFoundError:
+					print(f'{RED}{app}/config.json file not found{RESET}')
+					exit()
 
 
-			def load_imports(apps):
+			def load_imports(apps, debug=False):
 				imports = []
 				for app in apps:
-					imports.append(f'from {app} import dp_{app}')
+					if not app_config(app)['debug'] or debug:
+						imports.append(f'import {app}')
 				return imports
 
 
-			def get_dispatchers(apps):
+			def get_dispatchers(apps, debug=False):
 				dispachers = []
 				for app in apps:
-					dispachers.append(f'dp_{app}')
+					if not app_config(app)['debug'] or debug:
+						dispachers.append(f'{app}.dp')
 				return dispachers
-
+			
+			def app_reload(app):
+				return f'global {app};{app} = importlib.reload({app});'
 
 			cfg = config()
+			debug = cfg["debug"] if "debug" in cfg.keys() else False
 			apps = cfg['apps'] if 'apps' in cfg.keys() else []
 			port = cfg['port'] if 'port' in cfg.keys() else 8080
 			host = cfg['host'] if 'host' in cfg.keys() else ''
@@ -134,7 +150,53 @@ def main():
 			if 'ssl' in cfg.keys() and 'fullchain' in cfg.keys() and 'key' in cfg.keys():
 				ssl_fullchain = '"'+cfg['ssl']['fullchain']+'"' if cfg['ssl']['fullchain'] else None    
 				ssl_key = '"'+cfg['ssl']['key']+'"' if cfg['ssl']['key'] else None
-			start = ';'.join(load_imports(apps))+f';Server({",".join(get_dispatchers(apps))}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key}).listen(Address({port}, "{host}"))'
+			dps = get_dispatchers(apps, debug)
+			if dps == []:
+				print(f'{RED}Dispatchers not found. Check your apps and ./project.json{RESET}')
+				exit()
+			global get_dir_checksum
+			def get_dir_checksum(dir):
+				import hashlib
+				def get_dir_checksums(dir):
+					def md5(fname):
+						hash_md5 = hashlib.md5()
+						with open(fname, "rb") as f:
+							for chunk in iter(lambda: f.read(4096), b""):
+								hash_md5.update(chunk)
+						return hash_md5.hexdigest()
+					paths = os.listdir(dir)
+					checksums = []
+					for path in paths:
+						if os.path.isdir(path):
+							checksums += get_dir_checksums(dir+'/'+path)
+						elif path.endswith('.py'):
+							checksums.append(path+md5(dir+'/'+path))
+					return checksums
+				return hashlib.md5(''.join([checksum for checksum in get_dir_checksums(dir)]).encode()).hexdigest()
+			global checksum
+			checksum = get_dir_checksum('.')
+			reloader = """
+def reloader(server, delay=0.3):
+	import time, importlib
+	def runtime(delay, server):
+		global checksum
+		while True:
+			if checksum != get_dir_checksum('.'):
+				checksum = get_dir_checksum('.')
+				"""
+			for app in cfg['apps']:
+				if not app_config(app)['debug'] or debug:
+					reloader += app_reload(app)
+			reloader += """
+				print('\\n\\nServer updated')
+				print(server.address())
+				server.reload("""
+			reloader += ",".join(dps)
+			reloader += """)
+			time.sleep(delay)
+	import threading;threading.Thread(target=runtime, args=(delay, server)).start()
+"""
+			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key});reloader(server=server);server.listen(Address({port}, "{host}"))'
 			print('Starting server...')
 			exec(start)
 		elif sys.argv[1].lower() == 'create':
@@ -148,7 +210,11 @@ def main():
 				print(f'{BLUE}Hosts were not specified')
 			os.mkdir(ensure_appname)
 			with open(f'{ensure_appname}/__init__.py', 'w') as f:
-				data = """from %appname%.app import dp as dp_%appname%
+				data = """import sys, importlib
+if '%appname%.app' not in sys.modules.keys():
+    from %appname%.app import dp
+else:
+    dp = importlib.reload(sys.modules['%appname%.app']).dp
 """.replace('%appname%', ensure_appname)
 				f.write(data)
 			with open(f'{ensure_appname}/app.py', 'w') as f:
@@ -158,6 +224,13 @@ dp = Dispatcher(%hosts%)
 
 # Write your code down here                         
 """.replace('%appname%', ensure_appname).replace('%hosts%', '' if 'host' not in args.keys() else ', '.join(add_quotes_to_list(args['host'] if type(args['host']) == list else [args['host']])))
+				f.write(data)
+			with open(f'{ensure_appname}/config.json', 'w') as f:
+				data = """
+{
+	"debug": false
+}
+"""
 				f.write(data)
 			fr = open('project.json', 'r')
 			fj = json.loads(fr.read())
@@ -208,11 +281,28 @@ Commands%RESET%:
 			if 'name' not in args.keys():
 				return print(f'{RED}Template name is not specified{RESET}')
 			modulepath = os.path.abspath(slinn.__file__).replace('__init__.py', '')
+			fr = open('project.json', 'r')
+			fj = json.loads(fr.read())
+			fr.close()
+			if 'apps' in fj.keys():
+				fj['apps'].insert(0, args['name'])
+			else:
+				fj['apps'] = []
+			fw = open('project.json', 'w')
+			fw.write(json.dumps(fj, indent=4))
+			fw.close()
+			update()
 			try:
 				shutil.copytree(f'{modulepath}templates/{args["name"]}/', f'{apppath}/{args["name"]}')
+				try:
+					shutil.copytree(f'{modulepath}templates/{args["name"]}/data/', f'{apppath}/templates_data/{args["name"]}')
+				except  FileExistsError:
+					pass
+				except FileNotFoundError:
+					pass
 				return print(f'{GREEN}Template {args["name"]} successfully installed{RESET}') 
 			except FileExistsError:
-				return print(f'{BLUE}Template {args["name"]} has already existed installed{RESET}')
+				return print(f'{BLUE}Template {args["name"]} has already installed{RESET}')
 			except FileNotFoundError:
 				return print(f'{BLUE}Template {args["name"]} not found{RESET}')
 		else:

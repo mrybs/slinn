@@ -1,4 +1,4 @@
-from slinn import Server, Dispatcher, AnyFilter, LinkFilter, HttpResponse, HttpAPIResponse, Address
+from slinn import Dispatcher, AnyFilter, LinkFilter, HttpResponse, HttpAPIResponse
 
 
 dp = Dispatcher()
@@ -11,4 +11,4 @@ def api(request):
 
 @dp(AnyFilter)
 def helloworld(request):
-     return HttpResponse('Hello world!')
+     return HttpResponse('Hello, World!')
