@@ -1,10 +1,8 @@
 from slinn import utils
+from slinn.filter import Filter
 
 
-class LinkFilter:
+class LinkFilter(Filter):
 	def __init__(self, _filter: str, methods: list[str]=None):
-		self.filter = '\\/?' + _filter.replace('/', '\\/') + '(\\/.*)?'
+		self.filter = r'\/?' + _filter.replace('/', r'\/') + r'(\/.*)?'
 		self.methods = ['GET', 'POST'] if methods is None else methods
-		
-	def check(self, text: str, method: str) -> bool:
-		return utils.restartswith(text, self.filter) and method.upper() in self.methods

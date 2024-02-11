@@ -13,17 +13,19 @@ venv/bin/python manage.py run
 ```bat
 py -m slinn create helloworld
 cd helloworld
-venv/Scripts/activate
+venv\Scripts\activate
 py manage.py create localhost host=localhost host=127.0.0.1
 py manage.py run 
 ```
 
 #### Simple example
 ```python
-from slinn import Server, Dispatcher, AnyFilter, LinkFilter, HttpResponse, HttpAPIResponse, Address
+# localhost/app.py
+
+from slinn import Dispatcher, AnyFilter, LinkFilter, HttpResponse, HttpAPIResponse
 
 
-dp = Dispatcher()
+dp = Dispatcher('localhost', '127.0.0.1')
 
 
 @dp(LinkFilter('api'))
@@ -38,7 +40,8 @@ def helloworld(request):
 ```
 
 To config project you should edit `./project.json`
-To config app you should edit `./appname/config.json`
+
+To config app you should edit `./%app%/config.json`
 
 #### Functions:
 ```python
