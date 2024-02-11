@@ -314,7 +314,6 @@ Commands%RESET%:
 			ensure_appname = replace_all(args['name'], '-&$#!@%^().,', '_')
 			if not os.path.isdir(ensure_appname):
 				return print(f'{BLUE}The app named {args["name"]} does not exist{RESET}')
-			os.mkdir(ensure_appname)
 			with open(f'{ensure_appname}/__init__.py', 'w') as f:
 				data = """import sys, importlib
 if '%appname%.app' not in sys.modules.keys():
@@ -330,17 +329,6 @@ else:
 }
 """
 				f.write(data)
-			fr = open('project.json', 'r')
-			fj = json.loads(fr.read())
-			fr.close()
-			if 'apps' in fj.keys():
-				fj['apps'].insert(0, ensure_appname)
-			else:
-				fj['apps'] = []
-			fw = open('project.json', 'w')
-			fw.write(json.dumps(fj, indent=4))
-			fw.close()
-			update()
 			print(f'{GREEN}App successfully migrated{RESET}')
 		else:
 			return print(f'{RED}Command {sys.argv[1].lower()} is not exists{RESET}')

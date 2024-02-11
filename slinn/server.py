@@ -66,10 +66,11 @@ class Server:
 				if True in [utils.restartswith(request.host, host) for host in dispatcher.hosts]:
 					if self.smart_navigation:
 						sizes = [handle.filter.size(request.link, request.method) for handle in dispatcher.handles]
-						handle = dispatcher.handles[sizes.index(max(sizes))]
-						client_socket.sendall(handle.function(request).make(request.version))
-						client_socket.close()
-						return
+						if sizes != []:
+							handle = dispatcher.handles[sizes.index(max(sizes))]
+							client_socket.sendall(handle.function(request).make(request.version))
+							client_socket.close()
+							return
 					else:
 						for handle in dispatcher.handles:
 							if handle.filter.check(request.link, request.method):
