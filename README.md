@@ -45,45 +45,46 @@ To config app you should edit `./%app%/config.json`
 
 #### Functions:
 ```python
-Server(*dispatchers, ssl_cert: str=None, ssl_key: str=None, http_ver: str='2.0')
+Server(*dispatchers: list[Dispatcher], ssl_cert: str=None, ssl_key: str=None, http_ver: str='2.0')
 server.address() -> str
-server.reload(*dispatchers)
+server.reload(*dispatchers: list[Dispatcher])
 server.listen(address: Address)
 ```
 
 ```python
-Address(self, port: int, host: str=None)
+Address(port: int, host: str=None)
 ```
 
 ```python
-Dispatcher(self, hosts: list=None)
-dispatcher.route(self, filter: Filter)
+Dispatcher(hosts: list=None)
+dispatcher.route(filter: Filter)
 ```
 
 ```python
-Filter(self, filter: str, methods: list[str]=None)
-_filter.check(self, text: str, method: str) -> bool
+Filter(filter: str, methods: list[str]=None)
+_filter.check(text: str, method: str) -> bool
+_filter.size(text: str, method: str) -> int  # Special method for Smart Navigation
 
 # LinkFilter inherits from Filter
-LinkFilter(self, filter: str, methods: list[str]=None)
-link_filter.check(self, text: str, method: str) -> bool
+LinkFilter(filter: str, methods: list[str]=None)
+link_filter.check(text: str, method: str) -> bool
 
 # AnyFilter as same as Filter('.*')
 ```
 
 ```python
-HttpResponse(self, payload, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')
-HttpResponse.set_cookie(self, key: str, value)
-HttpResponse.make(self, type: str='HTTP/2.0') -> str
+HttpResponse(payload, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')
+HttpResponse.set_cookie(key: str, value)
+HttpResponse.make(type: str='HTTP/2.0') -> str
 
-HttpAPIResponse(self, payload, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')
-httpAPIResponse.set_cookie(self, key: str, value)
-httpAPIResponse.make(self, type: str='HTTP/2.0') -> str
+HttpAPIResponse(payload, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')
+httpAPIResponse.set_cookie(key: str, value)
+httpAPIResponse.make(type: str='HTTP/2.0') -> str
 
 # HttpRedirect inherits from HttpResponse
-HttpRedirect(self, location: str)
+HttpRedirect(location: str)
 ```
 
 ```python
-Request(self, http_data: str, client_address: tuple[str, int])
+Request(http_data: str, client_address: tuple[str, int])
 ```
