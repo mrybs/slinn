@@ -45,46 +45,66 @@ To config app you should edit `./%app%/config.json`
 
 #### Functions:
 ```python
-Server(*dispatchers: list[Dispatcher], ssl_cert: str=None, ssl_key: str=None, http_ver: str='2.0')
+from slinn import Server
+
+server = Server(*dispatchers: list[Dispatcher], ssl_cert: str=None, ssl_key: str=None, http_ver: str='2.0')
 server.address() -> str
 server.reload(*dispatchers: list[Dispatcher])
 server.listen(address: Address)
 ```
 
 ```python
-Address(port: int, host: str=None)
+from slinn import Address
+
+address = Address(port: int, host: str=None)
 ```
 
 ```python
-Dispatcher(hosts: list=None)
+from slinn import Dispatcher
+
+dispatcher = Dispatcher(hosts: list=None)
 dispatcher.route(filter: Filter)
 ```
 
 ```python
-Filter(filter: str, methods: list[str]=None)
+from slinn import Filter
+
+_filter = Filter(filter: str, methods: list[str]=None)
 _filter.check(text: str, method: str) -> bool
 _filter.size(text: str, method: str) -> int  # Special method for Smart Navigation
 
 # LinkFilter inherits from Filter
-LinkFilter(filter: str, methods: list[str]=None)
+from slinn import LinkFilter
+
+link_filter = LinkFilter(filter: str, methods: list[str]=None)
 link_filter.check(text: str, method: str) -> bool
 
 # AnyFilter as same as Filter('.*')
+from slinn import AnyFilter
 ```
 
 ```python
-HttpResponse(payload, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')
-HttpResponse.set_cookie(key: str, value)
-HttpResponse.make(type: str='HTTP/2.0') -> str
+from slinn import HttpResponse
 
-HttpAPIResponse(payload, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')
-httpAPIResponse.set_cookie(key: str, value)
-httpAPIResponse.make(type: str='HTTP/2.0') -> str
+http_response = HttpResponse(payload, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')
+http_response.set_cookie(key: str, value)
+http_response.make(type: str='HTTP/2.0') -> str
+
+# HttpAPIResponse inherits from HttpResponse
+from slinn import HttpAPIResponse
+
+http_api_response = HttpAPIResponse(payload, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')
+http_api_response.set_cookie(key: str, value)
+http_api_response.make(type: str='HTTP/2.0') -> str
 
 # HttpRedirect inherits from HttpResponse
+from slinn import HttpRedirect
+
 HttpRedirect(location: str)
 ```
 
 ```python
+from slinn import Request
+
 Request(http_data: str, client_address: tuple[str, int])
 ```
