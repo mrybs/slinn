@@ -66,6 +66,17 @@ if __name__ == '__main__':
 			shutil.copytree(modulepath, packages_dir+'/slinn')
 			shutil.copyfile(modulepath+'default/manage.py', f'{apppath}/manage.py')
 			print(f'{GREEN}Project has updated{RESET}')
+		elif sys.argv[1].lower() == 'help':
+			print("""%BOLD%Slinn help page
+
+Commands%RESET%:
+	%cmd% create {project`s name}		%GRAY%# Creates a new project%RESET%
+	%cmd% update {project`s name}		%GRAY%# Updates the project%RESET%
+	%cmd% help                   		%GRAY%# Prints this help%RESET%
+	%cmd% version                		%GRAY%# Prints version of Slinn%RESET%
+""".replace('%cmd%', f'py -m slinn').replace('%GRAY%', GRAY).replace('%RESET%', RESET).replace('%BOLD%', BOLD))
+		elif sys.argv[1].lower() == 'version':
+			print(slinn_version)
 		else:
 			print(f'{RED}Command {sys.argv[1].lower()} is not exists{RESET}')
 	else:

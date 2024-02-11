@@ -146,6 +146,7 @@ def main():
 			apps = cfg['apps'] if 'apps' in cfg.keys() else []
 			port = cfg['port'] if 'port' in cfg.keys() else 8080
 			host = cfg['host'] if 'host' in cfg.keys() else ''
+			smart_navigation = cfg['smart_navigation'] if 'smart_navigation' in cfg.keys() else True
 			ssl_fullchain, ssl_key = None, None
 			if 'ssl' in cfg.keys() and 'fullchain' in cfg.keys() and 'key' in cfg.keys():
 				ssl_fullchain = '"'+cfg['ssl']['fullchain']+'"' if cfg['ssl']['fullchain'] else None    
@@ -196,7 +197,7 @@ def reloader(server, delay=0.3):
 			time.sleep(delay)
 	import threading;threading.Thread(target=runtime, args=(delay, server)).start()
 """
-			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key});reloader(server=server);server.listen(Address({port}, "{host}"))'
+			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key});reloader(server=server);server.listen(Address({port}, "{host}"))'
 			print('Starting server...')
 			exec(start)
 		elif sys.argv[1].lower() == 'create':
@@ -270,6 +271,7 @@ Commands%RESET%:
 	%cmd% template {template`s name} (projects`s path)                     %GRAY%# Installs a template
 		Example: %cmd% template firstrun%RESET%
 	%cmd% update                                                           %GRAY%# Updates project.py%RESET%
+	%cmd% migrate_app {app`s name}                                         %GRAY%# Migrates app(check slinn.guides.migration1xx2xx.migration1xx2xx)%RESET
 	%cmd% help                                                             %GRAY%# Prints this help%RESET%
 	%cmd% version                                                          %GRAY%# Prints version of Slinn%RESET%
 """.replace('%cmd%', f'py {sys.argv[0]}').replace('%GRAY%', GRAY).replace('%RESET%', RESET).replace('%BOLD%', BOLD))
@@ -305,6 +307,41 @@ Commands%RESET%:
 				return print(f'{BLUE}Template {args["name"]} has already installed{RESET}')
 			except FileNotFoundError:
 				return print(f'{BLUE}Template {args["name"]} not found{RESET}')
+		elif sys.argv[1].lower() == 'migrate_app':
+			args = get_args(['name'], ' '.join(sys.argv[2:]))
+			if 'name' not in args.keys():
+				return print(f'{RED}The app`s name is not specified{RESET}')
+			ensure_appname = replace_all(args['name'], '-&$#!@%^().,', '_')
+			if not os.path.isdir(ensure_appname):
+				return print(f'{BLUE}The app named {args["name"]} does not exist{RESET}')
+			os.mkdir(ensure_appname)
+			with open(f'{ensure_appname}/__init__.py', 'w') as f:
+				data = """import sys, importlib
+if '%appname%.app' not in sys.modules.keys():
+    from %appname%.app import dp
+else:
+    dp = importlib.reload(sys.modules['%appname%.app']).dp
+""".replace('%appname%', ensure_appname)
+				f.write(data)
+			with open(f'{ensure_appname}/config.json', 'w') as f:
+				data = """
+{
+	"debug": false
+}
+"""
+				f.write(data)
+			fr = open('project.json', 'r')
+			fj = json.loads(fr.read())
+			fr.close()
+			if 'apps' in fj.keys():
+				fj['apps'].insert(0, ensure_appname)
+			else:
+				fj['apps'] = []
+			fw = open('project.json', 'w')
+			fw.write(json.dumps(fj, indent=4))
+			fw.close()
+			update()
+			print(f'{GREEN}App successfully migrated{RESET}')
 		else:
 			return print(f'{RED}Command {sys.argv[1].lower()} is not exists{RESET}')
 	else:
