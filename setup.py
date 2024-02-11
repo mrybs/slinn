@@ -8,10 +8,10 @@ templates = ['firstrun', 'example']
 
 
 setup(name='slinn',
-      version='2.0.0',
+      version='2.0.1',
       description='HTTPS and HTTP server framework',
       packages=['slinn', 'slinn.templates', 'slinn.guides'] + ['slinn.templates.' + template for template in templates],
-      package_data={'slinn': ['default/*.*']} | {'slinn.templates.' + template: ['data/*.css', 'data/*.html'] for template in templates},
+      package_data={'slinn': ['default/*.*']} | {'slinn.templates.' + template: ['data/*.css', 'data/*.html', 'config.json'] for template in templates},
       author='Mark Radin',
       author_email='mrybs2@gmail.com',
       url='https://slinn.miotp.ru/',

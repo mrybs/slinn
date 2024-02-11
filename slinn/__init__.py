@@ -9,4 +9,4 @@ from slinn.http_api_response import HttpAPIResponse
 from slinn.server import Server
 from slinn.dispatcher import Dispatcher
 
-version = 'Slinn Murega v2.0.0 110224c'
+version = 'Slinn Murega v2.0.1 110224d'
