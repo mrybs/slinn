@@ -3,12 +3,15 @@ from setuptools import setup
 def readme():
     with open('README.md', 'r') as f:
         return f.read()
+    
+templates = ['firstrun', 'example']
+
 
 setup(name='slinn',
-      version='1.2.1',
+      version='2.0.1',
       description='HTTPS and HTTP server framework',
-      packages=['slinn', 'slinn.default', 'slinn.templates', 'slinn.templates.firstrun'],
-      package_data={'slinn.templates.firstrun': ['data/*.css', 'data/*.html']},
+      packages=['slinn', 'slinn.templates', 'slinn.guides'] + ['slinn.templates.' + template for template in templates],
+      package_data={'slinn': ['default/*.*']} | {'slinn.templates.' + template: ['data/*.css', 'data/*.html', 'config.json'] for template in templates},
       author='Mark Radin',
       author_email='mrybs2@gmail.com',
       url='https://slinn.miotp.ru/',

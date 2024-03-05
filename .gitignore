@@ -3,3 +3,4 @@ slinnold/
 test/
 dist/
 */__pycache__/
+*.pyc
