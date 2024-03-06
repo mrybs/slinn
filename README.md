@@ -106,5 +106,19 @@ HttpRedirect(location: str)
 ```python
 from slinn import Request
 
-Request(http_data: str, client_address: tuple[str, int])
+request = Request(http_data: str, client_address: tuple[str, int])
+
+# Attributes
+request.ip, request.port  # Client`s IP and port
+request.method  # HTTP method
+request.version  # HTTP version
+request.full_link  # Full link(path and params)
+request.host  # Requested host
+request.user_agent  # Client`s user agent
+request.accept  # maybe supported technologies
+request.encoding  # Supported encodings
+request.language  # Client`s language
+request.link  # Link(only path)
+request.args  # GET args
+request.cookies  # All saved cookies
 ```

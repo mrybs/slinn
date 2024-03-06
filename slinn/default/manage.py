@@ -148,7 +148,7 @@ def main():
 			host = cfg['host'] if 'host' in cfg.keys() else ''
 			smart_navigation = cfg['smart_navigation'] if 'smart_navigation' in cfg.keys() else True
 			ssl_fullchain, ssl_key = None, None
-			if 'ssl' in cfg.keys() and 'fullchain' in cfg.keys() and 'key' in cfg.keys():
+			if 'ssl' in cfg.keys() and 'fullchain' in cfg['ssl'].keys() and 'key' in cfg['ssl'].keys():
 				ssl_fullchain = '"'+cfg['ssl']['fullchain']+'"' if cfg['ssl']['fullchain'] else None    
 				ssl_key = '"'+cfg['ssl']['key']+'"' if cfg['ssl']['key'] else None
 			dps = get_dispatchers(apps, debug)

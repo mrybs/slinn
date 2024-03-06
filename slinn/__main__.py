@@ -31,7 +31,20 @@ if __name__ == '__main__':
 				os.makedirs(packages_dir)
 			except FileExistsError:
 				pass
-			shutil.copytree(modulepath, packages_dir+'/slinn')
+			try:
+				shutil.copytree(modulepath, packages_dir+'/slinn')
+			except FileNotFoundError:
+				pass
+			try:
+				import pip
+				shutil.copytree(os.path.abspath(pip.__file__).replace('__init__.py', ''), packages_dir+'/pip')
+			except FileNotFoundError:
+				print(f'{BLUE}pip was not installed')
+			try:
+				import wheel
+				shutil.copytree(os.path.abspath(wheel.__file__).replace('__init__.py', ''), packages_dir+'/wheel')
+			except Exception:
+				print(f'{BLUE}wheel was not installed')
 			print(f'{GREEN}Project has created{RESET}')
 			modulepath = os.path.abspath(slinn.__file__).replace('__init__.py', '')
 			try:
