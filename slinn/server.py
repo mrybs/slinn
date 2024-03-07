@@ -1,4 +1,4 @@
-         from slinn import Request, Address, utils
+from slinn import Request, Address, utils
 import socket, ssl, threading, time, traceback, json, os
 
 
