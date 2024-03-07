@@ -140,7 +140,8 @@ def main():
 			
 			def app_reload(app):
 				return f'global {app};{app} = importlib.reload({app});'
-
+			
+			print('Loading config...')
 			cfg = config()
 			debug = cfg["debug"] if "debug" in cfg.keys() else False
 			apps = cfg['apps'] if 'apps' in cfg.keys() else []
@@ -197,8 +198,17 @@ def reloader(server, delay=0.3):
 			time.sleep(delay)
 	import threading;threading.Thread(target=runtime, args=(delay, server)).start()
 """
-			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key});reloader(server=server);server.listen(Address({port}, "{host}"))'
+			apps_info = []
+			for app in cfg['apps']:
+				if not app_config(app)['debug'] or debug:
+					apps_info.append(app)
+				else:
+					apps_info.append('['+app+']')
+			print(f'{GRAY}Apps: ' + ', '.join(apps_info))
+			print('Debug mode ' + 'enabled' if debug else 'disabled')
+			print('Smart navigation ' + ('enabled' if smart_navigation else 'disabled') + f'\n{RESET}')
 			print('Starting server...')
+			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key});reloader(server=server);server.listen(Address({port}, "{host}"))'
 			exec(start)
 		elif sys.argv[1].lower() == 'create':
 			args = get_args(['name', 'host'], ' '.join(sys.argv[2:]))

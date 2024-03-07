@@ -39,6 +39,17 @@ def helloworld(request):
 
 ```
 
+```
+$ venv/bin/python manage.py run
+Loading config...
+Apps: firstrun
+Debug mode enabled
+Smart navigation enabled
+
+Starting server...
+HTTP server is available on http://[::1]:8080/
+```
+
 To config project you should edit `./project.json`
 
 To config app you should edit `./%app%/config.json`
