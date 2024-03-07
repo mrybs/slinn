@@ -68,9 +68,10 @@ class Server:
 						sizes = [handle.filter.size(request.link, request.method) for handle in dispatcher.handles]
 						if sizes != []:
 							handle = dispatcher.handles[sizes.index(max(sizes))]
-							client_socket.sendall(handle.function(request).make(request.version))
-							client_socket.close()
-							return
+							if handle.filter.check(request.link, request.method):
+								client_socket.sendall(handle.function(request).make(request.version))
+								client_socket.close()
+								return
 					else:
 						for handle in dispatcher.handles:
 							if handle.filter.check(request.link, request.method):

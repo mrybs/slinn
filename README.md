@@ -39,6 +39,17 @@ def helloworld(request):
 
 ```
 
+```
+$ venv/bin/python manage.py run
+Loading config...
+Apps: firstrun
+Debug mode enabled
+Smart navigation enabled
+
+Starting server...
+HTTP server is available on http://[::1]:8080/
+```
+
 To config project you should edit `./project.json`
 
 To config app you should edit `./%app%/config.json`
@@ -106,5 +117,19 @@ HttpRedirect(location: str)
 ```python
 from slinn import Request
 
-Request(http_data: str, client_address: tuple[str, int])
+request = Request(http_data: str, client_address: tuple[str, int])
+
+# Attributes
+request.ip, request.port  # Client`s IP and port
+request.method  # HTTP method
+request.version  # HTTP version
+request.full_link  # Full link(path and params)
+request.host  # Requested host
+request.user_agent  # Client`s user agent
+request.accept  # maybe supported technologies
+request.encoding  # Supported encodings
+request.language  # Client`s language
+request.link  # Link(only path)
+request.args  # GET args
+request.cookies  # All saved cookies
 ```
