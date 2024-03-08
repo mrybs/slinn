@@ -39,6 +39,7 @@ def helloworld(request):
 
 ```
 
+Excepted output
 ```
 $ venv/bin/python manage.py run
 Loading config...
@@ -53,6 +54,29 @@ HTTP server is available on http://[::1]:8080/
 To config project you should edit `./project.json`
 
 To config app you should edit `./%app%/config.json`
+
+### Create classic project
+##### Unix-like (Linux, MacOS, FreeBSD...):
+```bash 
+mkdir helloworld 
+cd helloworld
+python3 -m venv venv
+venv/bin/activate
+```
+
+##### Windows:
+```bat
+mkdir helloworld 
+cd helloworld
+python3 -m venv venv
+venv\Scripts\activate
+```
+
+You should add this code to example `example.py`
+```
+Server(dp).listen(Address(8080))
+```
+then write `python example.py`
 
 #### Functions:
 ```python
@@ -74,7 +98,13 @@ address = Address(port: int, host: str=None)
 from slinn import Dispatcher
 
 dispatcher = Dispatcher(hosts: list=None)
-dispatcher.route(filter: Filter)
+
+# To add handler into dispatcher
+@dispatcher(filter: Filter)
+def handler(request: Request):
+    ...
+
+# handler should return HttpResponse-based object
 ```
 
 ```python
@@ -95,23 +125,32 @@ from slinn import AnyFilter
 ```
 
 ```python
-from slinn import HttpResponse
+from slinn import HttpResponse, HttpRedirect, HttpAPIResponse, HttpJSONResponse, HttpJSONAPIResponse
 
 http_response = HttpResponse(payload, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')
 http_response.set_cookie(key: str, value)
 http_response.make(type: str='HTTP/2.0') -> str
 
-# HttpAPIResponse inherits from HttpResponse
-from slinn import HttpAPIResponse
+HttpResponse('<h1>Hello world</h1>', content_type='text/html')
 
-http_api_response = HttpAPIResponse(payload, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')
-http_api_response.set_cookie(key: str, value)
-http_api_response.make(type: str='HTTP/2.0') -> str
+# HttpAPIResponse inherits from HttpResponse
+# HttpAPIResponse sets Access-Control-Allow-Origin to '*'
+
+HttpAPIResponse('{"status": "ok", "username": "mrybs"}')
 
 # HttpRedirect inherits from HttpResponse
-from slinn import HttpRedirect
-
 HttpRedirect(location: str)
+
+HttpRedirect('slinn.miotp.ru')
+
+# HttpJSONResponse for responding JSON 
+HttpJSONResponse(**payload)
+
+HttpJSONResponse(status='this action is forbidden', _status='403 Forbidden')
+
+# HttpJSONAPIResponse is like HttpJSONResponse, but it sets Access-Control-Allow-Origin to '*'
+
+HttpJSONAPIResponse(code=43657, until=1719931149)
 ```
 
 ```python
