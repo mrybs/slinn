@@ -1,4 +1,4 @@
-import urllib
+import urllib.parse
 
 class Request:	
 	def __init__(self, http_data: str, client_address: tuple[str, int]):
