@@ -80,8 +80,10 @@ class Server:
 			try:
 				request = Request(client_socket.recv(8192).decode(), client_address)
 				print(f'{self.GRAY}[{request.method}]{self.RESET} request {request.full_link} from {"" if "." in request.ip else "["}{request.ip}{"" if "." in request.ip else "]"}:{request.port} on {request.host}')
+			except KeyError:
+				return print('Got KeyError, probably invalid request. Ignore')
 			except UnicodeDecodeError:
-				return
+				return print('Got UnocodeDecodeError, probably invalid request. Ignore')
 			for dispatcher in self.dispatchers:
 				if True in [utils.restartswith(request.host, host) for host in dispatcher.hosts]:
 					if self.smart_navigation:
