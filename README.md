@@ -82,22 +82,28 @@ then write `python example.py`
 ```python
 from slinn import Server
 
-server = Server(*dispatchers: list[Dispatcher], ssl_cert: str=None, ssl_key: str=None, http_ver: str='2.0')
-server.address() -> str
-server.reload(*dispatchers: list[Dispatcher])
-server.listen(address: Address)
+server = Server(*dispatchers: list[Dispatcher], ssl_cert: str=None, ssl_key: str=None, delay=0.05)  # Main class to run server
+server.address() -> str  # Returns info str
+server.reload(*dispatchers: list[Dispatcher])  # Reloads server
+server.listen(address: Address)  # Start listening address
+
+Server(dp_api, dp_gui, ssl_cert='fullchain.pem', ssl_key='privkey.pem')
 ```
 
 ```python
 from slinn import Address
 
-address = Address(port: int, host: str=None)
+address = Address(port: int, host: str=None)  # A structure containing a port and a host; converts dns-address to ip-address
+
+Address(443, 'google.com')
 ```
 
 ```python
 from slinn import Dispatcher
 
-dispatcher = Dispatcher(hosts: list=None)
+dispatcher = Dispatcher(hosts: list=None)  # A class that contain many handlers
+
+Dispatcher('localhost', '127.0.0.1', '::1')
 
 # To add handler into dispatcher
 @dispatcher(filter: Filter)
@@ -108,26 +114,24 @@ def handler(request: Request):
 ```
 
 ```python
-from slinn import Filter
+from slinn import Filter, LinkFilter, AnyFilter
 
-_filter = Filter(filter: str, methods: list[str]=None)
-_filter.check(text: str, method: str) -> bool
+_filter = Filter(filter: str, methods: list[str]=None)  # This class is used to choose match handler by link; uses regexp
+_filter.check(text: str, method: str) -> bool  # Checks for a match by filter
 _filter.size(text: str, method: str) -> int  # Special method for Smart Navigation
 
-# LinkFilter inherits from Filter
-from slinn import LinkFilter
+Filter('/user/.+/profile.*')
 
-link_filter = LinkFilter(filter: str, methods: list[str]=None)
-link_filter.check(text: str, method: str) -> bool
+# LinkFilter inherits from Filter
+LinkFilter('user/.+/profile')
 
 # AnyFilter as same as Filter('.*')
-from slinn import AnyFilter
 ```
 
 ```python
 from slinn import HttpResponse, HttpRedirect, HttpAPIResponse, HttpJSONResponse, HttpJSONAPIResponse
 
-http_response = HttpResponse(payload, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')
+http_response = HttpResponse(payload, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')  # This class is used to convert some data to HTTP code
 http_response.set_cookie(key: str, value)
 http_response.make(type: str='HTTP/2.0') -> str
 
@@ -156,7 +160,7 @@ HttpJSONAPIResponse(code=43657, until=1719931149)
 ```python
 from slinn import Request
 
-request = Request(http_data: str, client_address: tuple[str, int])
+request = Request(http_data: str, client_address: tuple[str, int])  # This structure is used in the dispatcher`s handler
 
 # Attributes
 request.ip, request.port  # Client`s IP and port
