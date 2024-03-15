@@ -11,4 +11,4 @@ from slinn.http_json_api_response import HttpJSONAPIResponse
 from slinn.server import Server
 from slinn.dispatcher import Dispatcher
 
-version = 'Slinn Murega v2.1.2 150324a'
+version = 'Slinn Murega v2.1.2 150324b'

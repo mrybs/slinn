@@ -11,7 +11,7 @@ class Server:
 	RESET = '\u001b[0m'
 	GRAY = '\u001b[38;2;127;127;127m'
 	
-	def __init__(self, *dispatchers, smart_navigation=True, ssl_fullchain: str=None, ssl_key: str=None):
+	def __init__(self, *dispatchers, smart_navigation=True, ssl_fullchain: str=None, ssl_key: str=None, delay=0.05):
 		self.dispatchers = dispatchers
 		self.smart_navigation = smart_navigation
 		self.server_socket = None
@@ -21,6 +21,7 @@ class Server:
 		self.waiting = False
 		self.running = True
 		self.thread = None
+		self.delay = delay
 		self.__address = None
 
 	def reload(self, *dispatchers):
@@ -53,14 +54,14 @@ class Server:
 			self.ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
 			self.ssl_context.load_cert_chain(certfile=self.ssl_cert, keyfile=self.ssl_key)
 		self.running = True
-		print(self.address())
 		self.server_socket.listen()
+		print(self.address())
 		try:
 			while self.running:
 				if not self.waiting:
 					self.thread = utils.StoppableThread(target=self.handle_request)
 					self.thread.start()
-				time.sleep(0.1)
+				time.sleep(self.delay)
 		except KeyboardInterrupt:
 			print('Got KeyboardInterrupt, halting the application...')
 			if self.running:
