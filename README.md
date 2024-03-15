@@ -120,7 +120,7 @@ _filter = Filter(filter: str, methods: list[str]=None)  # This class is used to 
 _filter.check(text: str, method: str) -> bool  # Checks for a match by filter
 _filter.size(text: str, method: str) -> int  # Special method for Smart Navigation
 
-Filter('/user/.+/profile.*)
+Filter('/user/.+/profile.*')
 
 # LinkFilter inherits from Filter
 LinkFilter('user/.+/profile')
