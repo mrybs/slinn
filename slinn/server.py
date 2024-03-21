@@ -7,11 +7,8 @@ class Server:
 		def __init__(self, filter, function):
 			self.filter = filter
 			self.function = function
-
-	RESET = '\u001b[0m'
-	GRAY = '\u001b[38;2;127;127;127m'
 	
-	def __init__(self, *dispatchers, smart_navigation=True, ssl_fullchain: str=None, ssl_key: str=None):
+	def __init__(self, *dispatchers, smart_navigation=True, ssl_fullchain: str=None, ssl_key: str=None, delay=0.05, timeout=0.03, max_bytes_recieve=4096):
 		self.dispatchers = dispatchers
 		self.smart_navigation = smart_navigation
 		self.server_socket = None
@@ -21,13 +18,19 @@ class Server:
 		self.waiting = False
 		self.running = True
 		self.thread = None
+		self.delay = delay
+		self.timeout = timeout
+		self.max_bytes_recieve = max_bytes_recieve
 		self.__address = None
 
 	def reload(self, *dispatchers):
 		self.waiting = True
 		if self.thread is not None:
 			self.thread.stop()
-			self.thread.join()
+			try:
+				self.thread.join()
+			except RuntimeError:
+				pass
 		self.dispatchers = dispatchers
 		if self.running:
 			self.server_socket.close()
@@ -53,14 +56,14 @@ class Server:
 			self.ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
 			self.ssl_context.load_cert_chain(certfile=self.ssl_cert, keyfile=self.ssl_key)
 		self.running = True
-		print(self.address())
 		self.server_socket.listen()
+		print(self.address())
 		try:
 			while self.running:
 				if not self.waiting:
 					self.thread = utils.StoppableThread(target=self.handle_request)
 					self.thread.start()
-				time.sleep(0.1)
+				time.sleep(self.delay)
 		except KeyboardInterrupt:
 			print('Got KeyboardInterrupt, halting the application...')
 			if self.running:
@@ -78,10 +81,32 @@ class Server:
 				client_socket = self.ssl_context.wrap_socket(client_socket, server_side=True)
 			self.waiting = False
 			try:
-				request = Request(client_socket.recv(8192).decode(), client_address)
-				print(f'{self.GRAY}[{request.method}]{self.RESET} request {request.full_link} from {"" if "." in request.ip else "["}{request.ip}{"" if "." in request.ip else "]"}:{request.port} on {request.host}')
+				client_socket.settimeout(self.timeout)
+				data = bytearray()
+				while True:
+					try:
+						b = client_socket.recv(self.max_bytes_recieve)
+						data += b
+					except TimeoutError:
+						break
+					
+				data = data.split(b'\r\n\r\n')
+				header = data[0].decode()
+				content = b'\r\n\r\n'.join(data[1:])
+				
+				if header == '':
+					return
+
+				request = Request(header, content, client_address)
+				print(request)
+			except KeyError:
+				traceback.print_exc()
+				return print('Got KeyError, probably invalid request. Ignore')
 			except UnicodeDecodeError:
-				return
+				traceback.print_exc()
+				return print('Got UnocodeDecodeError, probably invalid request. Ignore')
+			except ConnectionResetError:
+				return print('Got ConnectionResetError. Ignore')
 			for dispatcher in self.dispatchers:
 				if True in [utils.restartswith(request.host, host) for host in dispatcher.hosts]:
 					if self.smart_navigation:
