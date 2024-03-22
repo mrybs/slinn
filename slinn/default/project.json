@@ -1,11 +1,15 @@
 {
     "host": "localhost",
     "port": 8080,
+    
     "debug": true,
-    "smart_navigation": true,
+
     "ssl": {
         "fullchain": false,
         "key": false
     },
-    "apps": ["firstrun"]
+    "apps": ["firstrun"],
+
+    "smart_navigation": true,
+    "delay": 0.05
 }

@@ -101,13 +101,13 @@ class Server:
 				request = Request(header, content, client_address)
 				print(request)
 			except KeyError:
-				traceback.print_exc()
 				return print('Got KeyError, probably invalid request. Ignore')
 			except UnicodeDecodeError:
-				traceback.print_exc()
 				return print('Got UnocodeDecodeError, probably invalid request. Ignore')
 			except ConnectionResetError:
 				return print('Got ConnectionResetError. Ignore')
+      except OSError:
+        return print('Connection closed')
 			for dispatcher in self.dispatchers:
 				if True in [utils.restartswith(request.host, host) for host in dispatcher.hosts]:
 					if self.smart_navigation:

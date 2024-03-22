@@ -82,10 +82,12 @@ then write `python example.py`
 ```python
 from slinn import Server
 
-server = Server(*dispatchers: list[Dispatcher], ssl_cert: str=None, ssl_key: str=None)  # Main class to run server
+server = Server(*dispatchers: list[Dispatcher], ssl_cert: str=None, ssl_key: str=None, delay=0.05)  # Main class to run server
 server.address() -> str  # Returns info str
 server.reload(*dispatchers: list[Dispatcher])  # Reloads server
 server.listen(address: Address)  # Start listening address
+
+Server(dp_api, dp_gui, ssl_cert='fullchain.pem', ssl_key='privkey.pem')
 ```
 
 ```python
@@ -118,7 +120,7 @@ _filter = Filter(filter: str, methods: list[str]=None)  # This class is used to 
 _filter.check(text: str, method: str) -> bool  # Checks for a match by filter
 _filter.size(text: str, method: str) -> int  # Special method for Smart Navigation
 
-Filter('/user/.+/profile.*)
+Filter('/user/.+/profile.*')
 
 # LinkFilter inherits from Filter
 LinkFilter('user/.+/profile')

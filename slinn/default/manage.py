@@ -147,6 +147,7 @@ def main():
 			apps = cfg['apps'] if 'apps' in cfg.keys() else []
 			port = cfg['port'] if 'port' in cfg.keys() else 8080
 			host = cfg['host'] if 'host' in cfg.keys() else ''
+			delay = float(cfg['delay']) if 'delay' in cfg.keys() else 0.05
 			smart_navigation = cfg['smart_navigation'] if 'smart_navigation' in cfg.keys() else True
 			ssl_fullchain, ssl_key = None, None
 			if 'ssl' in cfg.keys() and 'fullchain' in cfg['ssl'].keys() and 'key' in cfg['ssl'].keys():
@@ -206,9 +207,12 @@ def reloader(server, delay=0.3):
 					apps_info.append('['+app+']')
 			print(f'{GRAY}Apps: ' + ', '.join(apps_info))
 			print('Debug mode ' + 'enabled' if debug else 'disabled')
-			print('Smart navigation ' + ('enabled' if smart_navigation else 'disabled') + f'\n{RESET}')
+			print('Smart navigation ' + ('enabled' if smart_navigation else 'disabled'))
+			print(f'Delay: {str(delay*1000)}ms')
+			print(RESET)
+
 			print('Starting server...')
-			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key});reloader(server=server);server.listen(Address({port}, "{host}"))'
+			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key}, delay={delay});reloader(server=server);server.listen(Address({port}, "{host}"))'
 			exec(start)
 		elif sys.argv[1].lower() == 'create':
 			args = get_args(['name', 'host'], ' '.join(sys.argv[2:]))
