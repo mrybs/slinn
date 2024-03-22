@@ -264,6 +264,7 @@ dp = Dispatcher(%hosts%)
 			print(f'{GREEN}App successfully created{RESET}')
 		elif sys.argv[1].lower() == 'delete':
 			args = get_args(['name'], ' '.join(sys.argv[2:]))
+			apppath = (args['path']+'?').replace('/?', '').replace('?', '') if 'path' in args.keys() else '.'
 			if 'name' not in args.keys():
 				return print(f'{RED}The app`s name is not specified{RESET}')
 			ensure_appname = replace_all(args['name'], '-&$#!@%^().,', '_')
@@ -272,6 +273,10 @@ dp = Dispatcher(%hosts%)
 			if input(f'{RESET}Are you sure? (y/N) >>> ').lower() not in ['y', 'yes']:
 				return print(f'{RESET}Aborted')
 			shutil.rmtree(ensure_appname)
+			if os.path.isdir(f'{apppath}/templates_data/{ensure_appname}'):
+				shutil.rmtree(f'{apppath}/templates_data/{ensure_appname}')
+			if len(os.listdir('{apppath}/templates_data')) == 0:
+				shutil.rmtree(f'{apppath}/templates_data')
 			update()
 			return print(f'{GREEN}App successfully deleted{RESET}')
 		elif sys.argv[1].lower() == 'update':
@@ -283,7 +288,7 @@ Commands%RESET%:
 	%cmd% run                                                              %GRAY%# Starts server%RESET%
 	%cmd% create {app`s name} host=(host1) host=(host2)...                 %GRAY%# Creates a new app
 		Example: %cmd% create localhost host=localhost host=127.0.0.1%RESET%
-	%cmd% delete {app`s name}                                              %GRAY%# Deletes an app
+	%cmd% delete {app`s name} (project`s path)                             %GRAY%# Deletes an app
 		Example: %cmd% delete localhost%RESET%
 	%cmd% template {template`s name} (projects`s path)                     %GRAY%# Installs a template
 		Example: %cmd% template firstrun%RESET%
@@ -314,6 +319,8 @@ Commands%RESET%:
 			try:
 				shutil.copytree(f'{modulepath}templates/{args["name"]}/', f'{apppath}/{args["name"]}')
 				try:
+					if not os.isdir(f'{apppath}/templates_data'):
+						os.mkdir(f'{apppath}/templates_data')
 					shutil.copytree(f'{modulepath}templates/{args["name"]}/data/', f'{apppath}/templates_data/{args["name"]}')
 				except  FileExistsError:
 					pass
