@@ -20,7 +20,7 @@ class Server:
 		self.thread = None
 		self.delay = delay
 		self.timeout = timeout
-		self.max_bytes_recieve = max_bytes_per_recieve
+		self.max_bytes_per_recieve = max_bytes_per_recieve
 		self.max_bytes = max_bytes
 		self.__address = None
 
@@ -106,8 +106,8 @@ class Server:
 				return print('Got UnocodeDecodeError, probably invalid request. Ignore')
 			except ConnectionResetError:
 				return print('Got ConnectionResetError. Ignore')
-      except OSError:
-        return print('Connection closed')
+			except OSError:
+				return print('Connection closed')
 			for dispatcher in self.dispatchers:
 				if True in [utils.restartswith(request.host, host) for host in dispatcher.hosts]:
 					if self.smart_navigation:

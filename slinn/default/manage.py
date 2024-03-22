@@ -148,6 +148,9 @@ def main():
 			port = cfg['port'] if 'port' in cfg.keys() else 8080
 			host = cfg['host'] if 'host' in cfg.keys() else ''
 			delay = float(cfg['delay']) if 'delay' in cfg.keys() else 0.05
+			timeout = float(cfg['timeout']) if 'timeout' in cfg.keys() else 0.03
+			max_bytes_per_recieve = int(cfg['max_bytes_per_recieve']) if 'max_bytes_per_recieve' in cfg.keys() else 4096
+			max_bytes = int(cfg['max_bytes']) if 'max_bytes' in cfg.keys() else 4294967296
 			smart_navigation = cfg['smart_navigation'] if 'smart_navigation' in cfg.keys() else True
 			ssl_fullchain, ssl_key = None, None
 			if 'ssl' in cfg.keys() and 'fullchain' in cfg['ssl'].keys() and 'key' in cfg['ssl'].keys():
@@ -212,7 +215,7 @@ def reloader(server, delay=0.3):
 			print(RESET)
 
 			print('Starting server...')
-			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key}, delay={delay});reloader(server=server);server.listen(Address({port}, "{host}"))'
+			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key}, delay={delay}, timeout={timeout}, max_bytes_per_recieve={max_bytes_per_recieve}, max_bytes={max_bytes});reloader(server=server);server.listen(Address({port}, "{host}"))'
 			exec(start)
 		elif sys.argv[1].lower() == 'create':
 			args = get_args(['name', 'host'], ' '.join(sys.argv[2:]))
@@ -261,6 +264,7 @@ dp = Dispatcher(%hosts%)
 			print(f'{GREEN}App successfully created{RESET}')
 		elif sys.argv[1].lower() == 'delete':
 			args = get_args(['name'], ' '.join(sys.argv[2:]))
+			apppath = (args['path']+'?').replace('/?', '').replace('?', '') if 'path' in args.keys() else '.'
 			if 'name' not in args.keys():
 				return print(f'{RED}The app`s name is not specified{RESET}')
 			ensure_appname = replace_all(args['name'], '-&$#!@%^().,', '_')
@@ -269,6 +273,10 @@ dp = Dispatcher(%hosts%)
 			if input(f'{RESET}Are you sure? (y/N) >>> ').lower() not in ['y', 'yes']:
 				return print(f'{RESET}Aborted')
 			shutil.rmtree(ensure_appname)
+			if os.path.isdir(f'{apppath}/templates_data/{ensure_appname}'):
+				shutil.rmtree(f'{apppath}/templates_data/{ensure_appname}')
+			if len(os.listdir('{apppath}/templates_data')) == 0:
+				shutil.rmtree(f'{apppath}/templates_data')
 			update()
 			return print(f'{GREEN}App successfully deleted{RESET}')
 		elif sys.argv[1].lower() == 'update':
@@ -280,7 +288,7 @@ Commands%RESET%:
 	%cmd% run                                                              %GRAY%# Starts server%RESET%
 	%cmd% create {app`s name} host=(host1) host=(host2)...                 %GRAY%# Creates a new app
 		Example: %cmd% create localhost host=localhost host=127.0.0.1%RESET%
-	%cmd% delete {app`s name}                                              %GRAY%# Deletes an app
+	%cmd% delete {app`s name} (project`s path)                             %GRAY%# Deletes an app
 		Example: %cmd% delete localhost%RESET%
 	%cmd% template {template`s name} (projects`s path)                     %GRAY%# Installs a template
 		Example: %cmd% template firstrun%RESET%
@@ -311,6 +319,8 @@ Commands%RESET%:
 			try:
 				shutil.copytree(f'{modulepath}templates/{args["name"]}/', f'{apppath}/{args["name"]}')
 				try:
+					if not os.isdir(f'{apppath}/templates_data'):
+						os.mkdir(f'{apppath}/templates_data')
 					shutil.copytree(f'{modulepath}templates/{args["name"]}/data/', f'{apppath}/templates_data/{args["name"]}')
 				except  FileExistsError:
 					pass

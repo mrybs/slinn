@@ -82,7 +82,7 @@ then write `python example.py`
 ```python
 from slinn import Server
 
-server = Server(*dispatchers: list[Dispatcher], ssl_cert: str=None, ssl_key: str=None, delay=0.05)  # Main class to run server
+server = Server(*dispatchers: list[Dispatcher], ssl_cert: str=None, ssl_key: str=None, delay=0.05, timeout=0.03, max_bytes_per_recieve=4096, max_bytes=4294967296)  # Main class to run server
 server.address() -> str  # Returns info str
 server.reload(*dispatchers: list[Dispatcher])  # Reloads server
 server.listen(address: Address)  # Start listening address
@@ -175,4 +175,16 @@ request.language  # Client`s language
 request.link  # Link(only path)
 request.args  # GET args
 request.cookies  # All saved cookies
+request.files # Uploaded files
+```
+
+```python
+from slinn import File
+
+file = File(id: str=None, data: bytes|bytearray=bytearray())
+
+# Attributes
+file.id  # File`s id 
+file.data  # Binary data
+file.headers  # Headers such as Content-Disposition
 ```

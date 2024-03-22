@@ -11,5 +11,7 @@
     "apps": ["firstrun"],
 
     "smart_navigation": true,
-    "delay": 0.05
+    "delay": 0.05,
+    "max_bytes_per_recieve": 4096,
+    "max_bytes": 4294967296
 }
