@@ -8,7 +8,7 @@ class Server:
 			self.filter = filter
 			self.function = function
 	
-	def __init__(self, *dispatchers, smart_navigation=True, ssl_fullchain: str=None, ssl_key: str=None, delay=0.05, timeout=0.03, max_bytes_recieve=4096):
+	def __init__(self, *dispatchers, smart_navigation=True, ssl_fullchain: str=None, ssl_key: str=None, delay=0.05, timeout=0.03, max_bytes_per_recieve=4096, max_bytes=4294967296):
 		self.dispatchers = dispatchers
 		self.smart_navigation = smart_navigation
 		self.server_socket = None
@@ -20,7 +20,8 @@ class Server:
 		self.thread = None
 		self.delay = delay
 		self.timeout = timeout
-		self.max_bytes_recieve = max_bytes_recieve
+		self.max_bytes_recieve = max_bytes_per_recieve
+		self.max_bytes = max_bytes
 		self.__address = None
 
 	def reload(self, *dispatchers):
@@ -83,9 +84,9 @@ class Server:
 			try:
 				client_socket.settimeout(self.timeout)
 				data = bytearray()
-				while True:
+				while len(data) < self.max_bytes:
 					try:
-						b = client_socket.recv(self.max_bytes_recieve)
+						b = client_socket.recv(self.max_bytes_per_recieve)
 						data += b
 					except TimeoutError:
 						break
