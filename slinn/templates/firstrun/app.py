@@ -4,7 +4,7 @@ import slinn
 dp = Dispatcher()
 
 def read(filename):
-    file = open(filename, 'r')
+    file = open(filename, 'r', encoding='utf-8')
     data = file.read()
     file.close()
     return data

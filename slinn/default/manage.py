@@ -148,6 +148,9 @@ def main():
 			port = cfg['port'] if 'port' in cfg.keys() else 8080
 			host = cfg['host'] if 'host' in cfg.keys() else ''
 			delay = float(cfg['delay']) if 'delay' in cfg.keys() else 0.05
+			timeout = float(cfg['timeout']) if 'timeout' in cfg.keys() else 0.03
+			max_bytes_per_recieve = int(cfg['max_bytes_per_recieve']) if 'max_bytes_per_recieve' in cfg.keys() else 4096
+			max_bytes = int(cfg['max_bytes']) if 'max_bytes' in cfg.keys() else 4294967296
 			smart_navigation = cfg['smart_navigation'] if 'smart_navigation' in cfg.keys() else True
 			ssl_fullchain, ssl_key = None, None
 			if 'ssl' in cfg.keys() and 'fullchain' in cfg['ssl'].keys() and 'key' in cfg['ssl'].keys():
@@ -212,7 +215,7 @@ def reloader(server, delay=0.3):
 			print(RESET)
 
 			print('Starting server...')
-			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key}, delay={delay});reloader(server=server);server.listen(Address({port}, "{host}"))'
+			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key}, delay={delay}, timeout={timeout}, max_bytes_per_recieve={max_bytes_per_recieve}, max_bytes={max_bytes});reloader(server=server);server.listen(Address({port}, "{host}"))'
 			exec(start)
 		elif sys.argv[1].lower() == 'create':
 			args = get_args(['name', 'host'], ' '.join(sys.argv[2:]))

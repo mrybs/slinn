@@ -54,7 +54,7 @@ class Request:
 		self.ip, self.port = client_address[:2]
 		self.method = self.header['method']
 		self.version = self.header["ver"]
-		self.full_link = urllib.parse.unquote(self.header["link"])
+		self.full_link = urllib.parse.unquote(self.header["link"].replace('+', ' '))
 		self.host = self.header["data"]["Host"]
 		self.user_agent = self.header["data"]["User-Agent"] if 'User-Agent' in self.header['data'].keys() else self.header['data']['user-agent']
 		self.accept = self.header["data"]["Accept"].split(',')
@@ -65,4 +65,4 @@ class Request:
 		self.cookies = {c.split('=')[0]:c.split('=')[1] for c in self.header["data"]["Cookie"].split(';')} if 'Cookie' in self.header['data'] else []
 
 	def __str__(self):
-		return f'{GRAY}[{self.method}]{RESET} request {self.full_link} from {"" if "." in self.ip else "["}{self.ip}{"" if "." in self.ip else "]"}:{self.port} on {self.host}'
+		return f'{self.GRAY}[{self.method}]{self.RESET} request {self.full_link} from {"" if "." in self.ip else "["}{self.ip}{"" if "." in self.ip else "]"}:{self.port} on {self.host}'
