@@ -1,4 +1,3 @@
-from slinn import utils
 from slinn.filter import Filter
 
 

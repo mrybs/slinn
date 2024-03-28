@@ -46,7 +46,7 @@ class Request:
 		def get_args(text):
 				return {} if text == '' else {pair.split('=')[0]: '='.join(pair.split('=')[1:]) for pair in text.split('&')}
 		
-		self.type = header.split('\n')[0].strip().replace('\r','').split(' ')
+		self.type = header.split('\r\n')[0].strip().split(' ')
 		self.header = {'method': self.type[0], 'link': ' '.join(self.type[1:-1]), 'ver': self.type[-1], 'data': {'user-agent': '', 'Accept': '', 'Accept-Encoding': '', 'Accept-Language': ''}}
 		header = self.parse_http_header(header)
 		self.files = self.parse_http_body(body)
@@ -54,7 +54,7 @@ class Request:
 		self.ip, self.port = client_address[:2]
 		self.method = self.header['method']
 		self.version = self.header["ver"]
-		self.full_link = urllib.parse.unquote(self.header["link"].replace('+', ' '))
+		self.full_link = urllib.parse.unquote_plus(self.header["link"].replace('+', ' '))
 		self.host = self.header["data"]["Host"]
 		self.user_agent = self.header["data"]["User-Agent"] if 'User-Agent' in self.header['data'].keys() else self.header['data']['user-agent']
 		self.accept = self.header["data"]["Accept"].split(',')

@@ -1,14 +1,14 @@
-from slinn import Request, Address, utils
+from slinn import Request, Address, Filter, utils
 import socket, ssl, threading, time, traceback, os
 
 
 class Server:
 	class Handle:
-		def __init__(self, filter, function):
+		def __init__(self, filter: Filter, function):
 			self.filter = filter
 			self.function = function
 	
-	def __init__(self, *dispatchers, smart_navigation=True, ssl_fullchain: str=None, ssl_key: str=None, delay=0.05, timeout=0.03, max_bytes_per_recieve=4096, max_bytes=4294967296):
+	def __init__(self, *dispatchers: tuple, smart_navigation: bool=True, ssl_fullchain: str=None, ssl_key: str=None, delay: float=0.05, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296):
 		self.dispatchers = dispatchers
 		self.smart_navigation = smart_navigation
 		self.server_socket = None
@@ -24,7 +24,7 @@ class Server:
 		self.max_bytes = max_bytes
 		self.__address = None
 
-	def reload(self, *dispatchers):
+	def reload(self, *dispatchers: tuple):
 		self.waiting = True
 		if self.thread is not None:
 			self.thread.stop()
@@ -105,7 +105,7 @@ class Server:
 			except UnicodeDecodeError:
 				return print('Got UnocodeDecodeError, probably invalid request. Ignore')
 			except ConnectionResetError:
-				return print('Got ConnectionResetError. Ignore')
+				return print('Connection reset by client')
 			except OSError:
 				return print('Connection closed')
 			for dispatcher in self.dispatchers:
