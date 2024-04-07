@@ -1,12 +1,14 @@
 import sys, venv
 from slinn.default import *
 
+
 RED = '\u001b[31m'
 GREEN = '\u001b[32m'
 BLUE = '\u001b[34m'
 RESET = '\u001b[0m'
 BOLD = '\u001b[1m'
 GRAY = '\u001b[38;2;127;127;127m'
+
 
 if __name__ == '__main__':
 	if len(sys.argv) > 1:
@@ -46,6 +48,11 @@ if __name__ == '__main__':
 				shutil.copytree(os.path.abspath(wheel.__file__).replace('__init__.py', ''), packages_dir+'/wheel')
 			except Exception:
 				print(f'{BLUE}wheel was not installed{RESET}')
+			try:
+				import setuptools
+				shutil.copytree(os.path.abspath(setuptools.__file__).replace('__init__.py', ''), packages_dir+'/setuptools')
+			except Exception:
+				print(f'{BLUE}setuptools was not installed{RESET}')
 			print(f'{GREEN}Project has created{RESET}')
 			modulepath = os.path.abspath(slinn.__file__).replace('__init__.py', '')
 			try:
@@ -72,11 +79,11 @@ if __name__ == '__main__':
 			if not os.path.isdir(packages_dir+'/slinn'):
 				print(f'{RED}Virtual environment directory is corrupted. Reinstall the project{RESET}')
 				exit()
-			if not os.path.isdir(apppath+'/manage.py'):
+			if not os.path.isfile(apppath+'/manage.py'):
 				print(f'{RED}manage.py file does not exist. Reinstall the project{RESET}')
 				exit()
 			shutil.rmtree(packages_dir+'/slinn')
-			shutil.rmfile(apppath+'/manage.py')
+			os.remove(apppath+'/manage.py')
 			shutil.copytree(modulepath, packages_dir+'/slinn')
 			shutil.copyfile(modulepath+'default/manage.py', f'{apppath}/manage.py')
 			print(f'{GREEN}Project has updated{RESET}')

@@ -2,7 +2,7 @@ from slinn import Server, Filter
 
 
 class Dispatcher:
-	def __init__(self, *hosts: list):
+	def __init__(self, *hosts: tuple):
 		self.handles = []
 		self.hosts = hosts if list(hosts) != [] else ['.*']
 		

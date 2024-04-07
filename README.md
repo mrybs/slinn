@@ -10,7 +10,7 @@ venv/bin/python manage.py run
 ```
 
 ##### Windows:
-```bat
+```batch
 py -m slinn create helloworld
 cd helloworld
 venv\Scripts\activate
@@ -22,7 +22,7 @@ py manage.py run
 ```python
 # localhost/app.py
 
-from slinn import Dispatcher, AnyFilter, LinkFilter, HttpResponse, HttpAPIResponse
+from slinn import *
 
 
 dp = Dispatcher('localhost', '127.0.0.1')
@@ -30,7 +30,12 @@ dp = Dispatcher('localhost', '127.0.0.1')
 
 @dp(LinkFilter('api'))
 def api(request):
-    return HttpAPIResponse('{"status": "ok"}')
+    return HttpJSONAPIResponse(status='ok')
+
+@dp(LinkFilter(''))
+@dp(LinkFilter('index'))
+def index(request):
+    return HttpRedirect('/helloworld')
 
 
 @dp(AnyFilter)
@@ -46,6 +51,7 @@ Loading config...
 Apps: firstrun
 Debug mode enabled
 Smart navigation enabled
+Delay: 50.0ms
 
 Starting server...
 HTTP server is available on http://[::1]:8080/
@@ -65,7 +71,7 @@ venv/bin/activate
 ```
 
 ##### Windows:
-```bat
+```batch
 mkdir helloworld 
 cd helloworld
 python3 -m venv venv
@@ -82,9 +88,9 @@ then write `python example.py`
 ```python
 from slinn import Server
 
-server = Server(*dispatchers: list[Dispatcher], ssl_cert: str=None, ssl_key: str=None, delay=0.05)  # Main class to run server
+server = Server(*dispatchers: tuple, ssl_cert: str=None, ssl_key: str=None, delay: float=0.05, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296)  # Main class to run a server
 server.address() -> str  # Returns info str
-server.reload(*dispatchers: list[Dispatcher])  # Reloads server
+server.reload(*dispatchers: tuple)  # Reloads server
 server.listen(address: Address)  # Start listening address
 
 Server(dp_api, dp_gui, ssl_cert='fullchain.pem', ssl_key='privkey.pem')
@@ -95,13 +101,13 @@ from slinn import Address
 
 address = Address(port: int, host: str=None)  # A structure containing a port and a host; converts dns-address to ip-address
 
-Address(443, 'google.com')
+Address(443, 'google.com') <-> Address(443, '2a00:1450:4010:c02::71')
 ```
 
 ```python
 from slinn import Dispatcher
 
-dispatcher = Dispatcher(hosts: list=None)  # A class that contain many handlers
+dispatcher = Dispatcher(hosts: tuple=None)  # A class that contain many handlers
 
 Dispatcher('localhost', '127.0.0.1', '::1')
 
@@ -116,9 +122,8 @@ def handler(request: Request):
 ```python
 from slinn import Filter, LinkFilter, AnyFilter
 
-_filter = Filter(filter: str, methods: list[str]=None)  # This class is used to choose match handler by link; uses regexp
+_filter = Filter(filter: str, methods: tuple=None)  # This class is used to choose match handler by link; uses regexp
 _filter.check(text: str, method: str) -> bool  # Checks for a match by filter
-_filter.size(text: str, method: str) -> int  # Special method for Smart Navigation
 
 Filter('/user/.+/profile.*')
 
@@ -131,9 +136,9 @@ LinkFilter('user/.+/profile')
 ```python
 from slinn import HttpResponse, HttpRedirect, HttpAPIResponse, HttpJSONResponse, HttpJSONAPIResponse
 
-http_response = HttpResponse(payload, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')  # This class is used to convert some data to HTTP code
-http_response.set_cookie(key: str, value)
-http_response.make(type: str='HTTP/2.0') -> str
+http_response = HttpResponse(payload: any, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')  # This class is used to convert some data to HTTP code
+http_response.set_cookie(key: str, value: any)  # Sets cookie
+http_response.make(type: str='HTTP/2.0') -> str  # Makes HTTP code
 
 HttpResponse('<h1>Hello world</h1>', content_type='text/html')
 
@@ -148,11 +153,11 @@ HttpRedirect(location: str)
 HttpRedirect('slinn.miotp.ru')
 
 # HttpJSONResponse for responding JSON 
-HttpJSONResponse(**payload)
+HttpJSONResponse(**payload: dict)
 
 HttpJSONResponse(status='this action is forbidden', _status='403 Forbidden')
 
-# HttpJSONAPIResponse is like HttpJSONResponse, but it sets Access-Control-Allow-Origin to '*'
+# HttpJSONAPIResponse for responding JSON and it sets Access-Control-Allow-Origin to '*'
 
 HttpJSONAPIResponse(code=43657, until=1719931149)
 ```
@@ -160,7 +165,10 @@ HttpJSONAPIResponse(code=43657, until=1719931149)
 ```python
 from slinn import Request
 
-request = Request(http_data: str, client_address: tuple[str, int])  # This structure is used in the dispatcher`s handler
+request = Request(header: str, body: bytes, client_address: tuple[str, int])  # This structure is used in the dispatcher`s handler
+request.parse_http_header(http_header: str)  # Parse HTTP request`s header
+request.parse_http_body(http_body: body)  # Parse HTTP request`s body if exists
+str(request)  # Convert slinn.Request to info text
 
 # Attributes
 request.ip, request.port  # Client`s IP and port
@@ -175,4 +183,16 @@ request.language  # Client`s language
 request.link  # Link(only path)
 request.args  # GET args
 request.cookies  # All saved cookies
+request.files # Uploaded files
+```
+
+```python
+from slinn import File
+
+file = File(id: str=None, data: bytes|bytearray=bytearray())
+
+# Attributes
+file.id  # File`s id 
+file.data  # Binary data
+file.headers  # Headers such as Content-Disposition
 ```
