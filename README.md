@@ -46,6 +46,7 @@ Loading config...
 Apps: firstrun
 Debug mode enabled
 Smart navigation enabled
+Delay: 50.0ms
 
 Starting server...
 HTTP server is available on http://[::1]:8080/
@@ -82,9 +83,9 @@ then write `python example.py`
 ```python
 from slinn import Server
 
-server = Server(*dispatchers: list[Dispatcher], ssl_cert: str=None, ssl_key: str=None, delay=0.05, timeout=0.03, max_bytes_per_recieve=4096, max_bytes=4294967296)  # Main class to run server
+server = Server(*dispatchers: tuple, ssl_cert: str=None, ssl_key: str=None, delay: float=0.05, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296)  # Main class to run server
 server.address() -> str  # Returns info str
-server.reload(*dispatchers: list[Dispatcher])  # Reloads server
+server.reload(*dispatchers: tuple)  # Reloads server
 server.listen(address: Address)  # Start listening address
 
 Server(dp_api, dp_gui, ssl_cert='fullchain.pem', ssl_key='privkey.pem')
@@ -101,7 +102,7 @@ Address(443, 'google.com')
 ```python
 from slinn import Dispatcher
 
-dispatcher = Dispatcher(hosts: list=None)  # A class that contain many handlers
+dispatcher = Dispatcher(hosts: tuple=None)  # A class that contain many handlers
 
 Dispatcher('localhost', '127.0.0.1', '::1')
 
@@ -116,7 +117,7 @@ def handler(request: Request):
 ```python
 from slinn import Filter, LinkFilter, AnyFilter
 
-_filter = Filter(filter: str, methods: list[str]=None)  # This class is used to choose match handler by link; uses regexp
+_filter = Filter(filter: str, methods: tuple=None)  # This class is used to choose match handler by link; uses regexp
 _filter.check(text: str, method: str) -> bool  # Checks for a match by filter
 _filter.size(text: str, method: str) -> int  # Special method for Smart Navigation
 
@@ -131,8 +132,8 @@ LinkFilter('user/.+/profile')
 ```python
 from slinn import HttpResponse, HttpRedirect, HttpAPIResponse, HttpJSONResponse, HttpJSONAPIResponse
 
-http_response = HttpResponse(payload, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')  # This class is used to convert some data to HTTP code
-http_response.set_cookie(key: str, value)
+http_response = HttpResponse(payload: any, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')  # This class is used to convert some data to HTTP code
+http_response.set_cookie(key: str, value: any)
 http_response.make(type: str='HTTP/2.0') -> str
 
 HttpResponse('<h1>Hello world</h1>', content_type='text/html')
@@ -148,7 +149,7 @@ HttpRedirect(location: str)
 HttpRedirect('slinn.miotp.ru')
 
 # HttpJSONResponse for responding JSON 
-HttpJSONResponse(**payload)
+HttpJSONResponse(**payload: dict)
 
 HttpJSONResponse(status='this action is forbidden', _status='403 Forbidden')
 
@@ -160,7 +161,10 @@ HttpJSONAPIResponse(code=43657, until=1719931149)
 ```python
 from slinn import Request
 
-request = Request(http_data: str, client_address: tuple[str, int])  # This structure is used in the dispatcher`s handler
+request = Request(header: str, body: bytes, client_address: tuple[str, int])  # This structure is used in the dispatcher`s handler
+request.parse_http_header(http_header: str)  # Parse HTTP request`s header
+request.parse_http_body(http_body: body)  # Parse HTTP request`s body if exists
+str(request)  # Convert slinn.Request to info text
 
 # Attributes
 request.ip, request.port  # Client`s IP and port

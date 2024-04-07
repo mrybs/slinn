@@ -275,7 +275,7 @@ dp = Dispatcher(%hosts%)
 			shutil.rmtree(ensure_appname)
 			if os.path.isdir(f'{apppath}/templates_data/{ensure_appname}'):
 				shutil.rmtree(f'{apppath}/templates_data/{ensure_appname}')
-			if len(os.listdir('{apppath}/templates_data')) == 0:
+			if len(os.listdir(f'{apppath}/templates_data')) == 0:
 				shutil.rmtree(f'{apppath}/templates_data')
 			update()
 			return print(f'{GREEN}App successfully deleted{RESET}')
@@ -293,7 +293,7 @@ Commands%RESET%:
 	%cmd% template {template`s name} (projects`s path)                     %GRAY%# Installs a template
 		Example: %cmd% template firstrun%RESET%
 	%cmd% update                                                           %GRAY%# Updates project.py%RESET%
-	%cmd% migrate_app {app`s name}                                         %GRAY%# Migrates app(check slinn.guides.migration1xx2xx.migration1xx2xx)%RESET
+	%cmd% migrate_app {app`s name}                                         %GRAY%# Migrates app(check slinn.guides.migration1xx2xx.migration1xx2xx)%RESET%
 	%cmd% help                                                             %GRAY%# Prints this help%RESET%
 	%cmd% version                                                          %GRAY%# Prints version of Slinn%RESET%
 """.replace('%cmd%', f'py {sys.argv[0]}').replace('%GRAY%', GRAY).replace('%RESET%', RESET).replace('%BOLD%', BOLD))
