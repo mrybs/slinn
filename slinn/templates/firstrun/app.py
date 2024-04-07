@@ -16,4 +16,4 @@ def colorscss(request):
                        
 @dp(Filter('.*'))
 def index(request):
-    return HttpResponse(read('templates_data/firstrun/slinn.html').replace('{% version %}', slinn.version.split()[1]), content_type='text/html')
+    return HttpResponse(read('templates_data/firstrun/slinn.html').replace('{% version %}', slinn.version.split()[2]), content_type='text/html')

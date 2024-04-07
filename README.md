@@ -51,7 +51,6 @@ Loading config...
 Apps: firstrun
 Debug mode enabled
 Smart navigation enabled
-Delay: 50.0ms
 
 Starting server...
 HTTP server is available on http://[::1]:8080/
@@ -89,7 +88,7 @@ then write `python example.py`
 from slinn import Server
 
 server = Server(*dispatchers: tuple, ssl_cert: str=None, ssl_key: str=None, delay: float=0.05, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296)  # Main class to run a server
-server.address() -> str  # Returns info str
+server.address(port: int, host: str) -> str  # Returns message like 'HTTPS server is available on https://localhost:8080/'
 server.reload(*dispatchers: tuple)  # Reloads server
 server.listen(address: Address)  # Start listening address
 
