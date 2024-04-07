@@ -8,23 +8,20 @@ class Server:
 			self.filter = filter
 			self.function = function
 	
-	def __init__(self, *dispatchers: tuple, smart_navigation: bool=True, ssl_fullchain: str=None, ssl_key: str=None, delay: float=0.05, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296):
+	def __init__(self, *dispatchers: tuple, smart_navigation: bool=True, ssl_fullchain: str=None, ssl_key: str=None, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296):
 		self.dispatchers = dispatchers
 		self.smart_navigation = smart_navigation
 		self.server_socket = None
 		self.ssl = ssl_fullchain is not None and ssl_key is not None
 		self.ssl_cert, self.ssl_key = ssl_fullchain, ssl_key
 		self.ssl_context = None
-		self.waiting = False
 		self.thread = None
-		self.delay = delay
 		self.timeout = timeout
 		self.max_bytes_per_recieve = max_bytes_per_recieve
 		self.max_bytes = max_bytes
 		self.__address = None
 
 	def reload(self, *dispatchers: tuple):
-		self.waiting = True
 		if self.thread is not None:
 			self.thread.stop()
 			try:
@@ -32,49 +29,39 @@ class Server:
 			except RuntimeError:
 				pass
 		self.dispatchers = dispatchers
-		if utils.check_socket(self.server_socket):
-			self.server_socket.close()
-		if self.__address is not None:
-			self.listen(self.__address)
+			
 
-	def address(self):
-		return f'HTTP{"S" if self.ssl else ""} server is available on http{"s" if self.ssl else ""}://{"" if "." in self.host else "["}{self.host}{"" if "." in self.host else "]"}{(":"+str(self.port) if self.port != 443 else "") if self.ssl else (":"+str(self.port )if self.port != 80 else "")}/'
+	def address(self, port: int, host: str):
+		return f'HTTP{"S" if self.ssl else ""} server is available on http{"s" if self.ssl else ""}://{"" if "." in host else "["}{host}{"" if "." in host else "]"}{(":"+str(port) if port != 443 else "") if self.ssl else (":"+str(port )if port != 80 else "")}/'
 		
 	def listen(self, address: Address):		
-		self.__address = address
-		self.host, self.port = address.host, address.port
-		if socket.has_dualstack_ipv6() and '.' not in self.host and ':' not in self.host:
-			self.server_socket = socket.create_server((self.host, self.port), family=socket.AF_INET6, dualstack_ipv6=True)
-		elif ':' in self.host:
-			self.server_socket = socket.create_server((self.host, self.port), family=socket.AF_INET6)
+		self.server_socket = None
+		if socket.has_dualstack_ipv6() and '.' not in address.host and ':' not in address.host:
+			self.server_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, dualstack_ipv6=True)
+		elif ':' in address.host:
+			self.server_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
 		else:
-			self.server_socket = socket.create_server((self.host, self.port), family=(socket.AF_INET if '.' in self.host else socket.AF_INET6))
+			self.server_socket = socket.socket(socket.AF_INET if '.' in self.host else socket.AF_INET6, socket.SOCK_STREAM)
 		self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		self.server_socket.bind((address.host, address.port))
 		if self.ssl:
 			self.ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
 			self.ssl_context.load_cert_chain(certfile=self.ssl_cert, keyfile=self.ssl_key)
 		self.server_socket.listen()
-		print(self.address())
-		self.waiting = False
+		print(self.address(address.port, address.host))
 		try:
-			while utils.check_socket(self.server_socket):
-				if not self.waiting:
-					self.thread = utils.StoppableThread(target=self.handle_request)
-					self.thread.start()
-				time.sleep(self.delay)
+			while True:
+				utils.StoppableThread(target=self.handle_request, args=self.server_socket.accept()).start()
 		except KeyboardInterrupt:
 			print('Got KeyboardInterrupt, halting the application...')
 			if utils.check_socket(self.server_socket):
 				self.server_socket.close()
 			os._exit(0)
 						
-	def handle_request(self):
+	def handle_request(self, client_socket, client_address):
 		try:
-			self.waiting = True
-			client_socket, client_address = self.server_socket.accept()
 			if self.ssl:
 				client_socket = self.ssl_context.wrap_socket(client_socket, server_side=True)
-			self.waiting = False
 			try:
 				client_socket.settimeout(self.timeout)
 				data = bytearray()
@@ -95,12 +82,8 @@ class Server:
 				request = Request(header, content, client_address)
 				print(request)
 			except KeyError:
-				if utils.check_socket(client_socket):
-					client_socket.close()
 				return print('Got KeyError, probably invalid request. Ignore')
 			except UnicodeDecodeError:
-				if utils.check_socket(client_socket):
-					client_socket.close()
 				return print('Got UnocodeDecodeError, probably invalid request. Ignore')
 			except ConnectionResetError:
 				return print('Connection reset by client')
@@ -132,4 +115,3 @@ class Server:
 		except Exception:
 			print('During handling request, an exception has occured:')
 			traceback.print_exc()
-			self.waiting = False
