@@ -4,3 +4,5 @@ test/
 dist/
 */__pycache__/
 *.pyc
+localhost.crt
+localhost.key
