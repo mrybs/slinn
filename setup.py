@@ -8,8 +8,8 @@ templates = ['firstrun', 'example']
 
 
 setup(name='slinn',
-      version='2.2.1',
-      description='HTTPS and HTTP server framework',
+      version='2.2.2',
+      description='A HTTPS and HTTP server framework',
       packages=['slinn', 'slinn.templates', 'slinn.guides'] + ['slinn.templates.' + template for template in templates],
       package_data={'slinn': ['default/*.*']} | {'slinn.templates.' + template: ['data/*.css', 'data/*.html', 'config.json'] for template in templates},
       author='Mark Radin',
