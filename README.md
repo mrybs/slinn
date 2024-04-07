@@ -88,7 +88,7 @@ then write `python example.py`
 from slinn import Server
 
 server = Server(*dispatchers: tuple, ssl_cert: str=None, ssl_key: str=None, delay: float=0.05, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296)  # Main class to run a server
-server.address(port: int, host: str) -> str  # Returns message like 'HTTPS server is available on https://localhost:8080/'
+server.address(port: int, domain: str) -> str  # Returns message like 'HTTPS server is available on https://localhost:8080/'
 server.reload(*dispatchers: tuple)  # Reloads server
 server.listen(address: Address)  # Start listening address
 
@@ -99,6 +99,11 @@ Server(dp_api, dp_gui, ssl_cert='fullchain.pem', ssl_key='privkey.pem')
 from slinn import Address
 
 address = Address(port: int, host: str=None)  # A structure containing a port and a host; converts dns-address to ip-address
+
+# Attributes
+address.port  # port
+address.host  # ip
+address.domain  # non-converted host from constructor
 
 Address(443, 'google.com') <-> Address(443, '2a00:1450:4010:c02::71')
 ```

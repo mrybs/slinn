@@ -31,8 +31,8 @@ class Server:
 		self.dispatchers = dispatchers
 			
 
-	def address(self, port: int, host: str):
-		return f'HTTP{"S" if self.ssl else ""} server is available on http{"s" if self.ssl else ""}://{"" if "." in host else "["}{host}{"" if "." in host else "]"}{(":"+str(port) if port != 443 else "") if self.ssl else (":"+str(port )if port != 80 else "")}/'
+	def address(self, port: int, domain: str):
+		return f'HTTP{"S" if self.ssl else ""} server is available on http{"s" if self.ssl else ""}://{"[" if ":" in host else ""}{host}{"]" if ":" in host else ""}{(":"+str(port) if port != 443 else "") if self.ssl else (":"+str(port )if port != 80 else "")}/'
 		
 	def listen(self, address: Address):		
 		self.server_socket = None
@@ -48,7 +48,7 @@ class Server:
 			self.ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
 			self.ssl_context.load_cert_chain(certfile=self.ssl_cert, keyfile=self.ssl_key)
 		self.server_socket.listen()
-		print(self.address(address.port, address.host))
+		print(self.address(address.port, address.domain))
 		try:
 			while True:
 				utils.StoppableThread(target=self.handle_request, args=self.server_socket.accept()).start()
