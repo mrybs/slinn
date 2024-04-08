@@ -180,32 +180,27 @@ def main():
 				return hashlib.md5(''.join([checksum for checksum in get_dir_checksums(dir)]).encode()).hexdigest()
 			global checksum
 			checksum = get_dir_checksum('.')
+
 			reloader = """
-def reloader(server, delay=0.3):
-	import time, importlib, traceback
-	def runtime(server):
-		global checksum
-		try:
-			if checksum != get_dir_checksum('.'):
-				checksum = get_dir_checksum('.')
-				"""
+def reloader(server):
+	import importlib, traceback
+	global checksum
+	try:
+		if checksum != get_dir_checksum('.'):
+			checksum = get_dir_checksum('.')
+			"""
 			for app in cfg['apps']:
 				if not app_config(app)['debug'] or debug:
 					reloader += app_reload(app)
 			reloader += """
-				print('\\n\\nServer updated')
-				print(server.address("""+f'{port}, "{host}"'+"""))
-				server.reload("""
+			server.reload("""
 			reloader += ",".join(dps)
 			reloader += """)
-		except Exception:
-			print('During handling request, an exception has occured:')
-			traceback.print_exc()
-	import threading
-	while True:
-		threading.Thread(target=runtime, args=(server,)).start()
-		time.sleep(delay)
+	except Exception:
+		print('During handling request, an exception has occured:')
+		traceback.print_exc()
 """
+
 			apps_info = []
 			for app in cfg['apps']:
 				if not app_config(app)['debug'] or debug:
@@ -218,7 +213,7 @@ def reloader(server, delay=0.3):
 			print(RESET)
 
 			print('Starting server...')
-			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key}, timeout={timeout}, max_bytes_per_recieve={max_bytes_per_recieve}, max_bytes={max_bytes});reloader(server=server);server.listen(Address({port}, "{host}"))'
+			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key}, timeout={timeout}, max_bytes_per_recieve={max_bytes_per_recieve}, max_bytes={max_bytes}, _func=reloader);server.listen(Address({port}, "{host}"))'
 			exec(start)
 		elif sys.argv[1].lower() == 'create':
 			args = get_args(['name', 'host'], ' '.join(sys.argv[2:]))

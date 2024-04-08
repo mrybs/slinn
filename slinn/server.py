@@ -11,7 +11,7 @@ class Server:
 			self.filter = filter
 			self.function = function
 	
-	def __init__(self, *dispatchers: tuple, smart_navigation: bool=True, ssl_fullchain: str=None, ssl_key: str=None, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296):
+	def __init__(self, *dispatchers: tuple, smart_navigation: bool=True, ssl_fullchain: str=None, ssl_key: str=None, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296, _func=lambda server: None):
 		self.dispatchers = dispatchers
 		self.smart_navigation = smart_navigation
 		self.server_socket = None
@@ -22,6 +22,7 @@ class Server:
 		self.timeout = timeout
 		self.max_bytes_per_recieve = max_bytes_per_recieve
 		self.max_bytes = max_bytes
+		self._func = _func
 
 	def reload(self, *dispatchers: tuple):
 		if self.thread is not None:
@@ -66,6 +67,7 @@ class Server:
 						
 	def handle_request(self, client_socket, client_address):
 		try:
+			self._func(self)
 			if self.ssl:
 				client_socket = self.ssl_context.wrap_socket(client_socket, server_side=True)
 			try:
