@@ -203,7 +203,7 @@ def reloader(server, delay=0.3):
 			traceback.print_exc()
 	import threading
 	while True:
-		threading.Thread(target=runtime, args=(server)).start()
+		threading.Thread(target=runtime, args=(server,)).start()
 		time.sleep(delay)
 """
 			apps_info = []
