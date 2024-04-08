@@ -183,27 +183,28 @@ def main():
 			reloader = """
 def reloader(server, delay=0.3):
 	import time, importlib, traceback
-	def runtime(delay, server):
+	def runtime(server):
 		global checksum
-		while True:
-			try:
-				if checksum != get_dir_checksum('.'):
-					checksum = get_dir_checksum('.')
-					"""
+		try:
+			if checksum != get_dir_checksum('.'):
+				checksum = get_dir_checksum('.')
+				"""
 			for app in cfg['apps']:
 				if not app_config(app)['debug'] or debug:
 					reloader += app_reload(app)
 			reloader += """
-					print('\\n\\nServer updated')
-					print(server.address("""+f'{port}, "{host}"'+"""))
-					server.reload("""
+				print('\\n\\nServer updated')
+				print(server.address("""+f'{port}, "{host}"'+"""))
+				server.reload("""
 			reloader += ",".join(dps)
 			reloader += """)
-				time.sleep(delay)
-			except Exception:
-				print('During handling request, an exception has occured:')
-				traceback.print_exc()
-	import threading;threading.Thread(target=runtime, args=(delay, server)).start()
+		except Exception:
+			print('During handling request, an exception has occured:')
+			traceback.print_exc()
+	import threading
+	while True:
+		threading.Thread(target=runtime, args=(server)).start()
+		time.sleep(delay)
 """
 			apps_info = []
 			for app in cfg['apps']:
