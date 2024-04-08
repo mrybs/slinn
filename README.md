@@ -1,24 +1,24 @@
-# Slinn is a HTTPS and HTTP server framework
+# slinn
+**Slinn is a HTTPS and HTTP server framework**
 
-### Create project
-##### Unix-like (Linux, MacOS, FreeBSD...):
-```bash
-python3 -m slinn create helloworld
-cd helloworld
-venv/bin/python manage.py create localhost host=localhost host=127.0.0.1
-venv/bin/python manage.py run 
-```
+![License](https://img.shields.io/github/license/mrybs/slinn)
+![Test passing](https://img.shields.io/badge/works_on_my_server-2BD331)
 
-##### Windows:
-```batch
-py -m slinn create helloworld
-cd helloworld
-venv\Scripts\activate
-py manage.py create localhost host=localhost host=127.0.0.1
-py manage.py run 
-```
+![GitHub Release](https://img.shields.io/github/v/release/mrybs/slinn)
+![GitHub top language](https://img.shields.io/github/languages/top/mrybs/slinn)
 
-#### Simple example
+![GitHub Repo stars](https://img.shields.io/github/stars/mrybs/slinn)
+![GitHub watchers](https://img.shields.io/github/watchers/mrybs/slinn)
+![GitHub forks](https://img.shields.io/github/forks/mrybs/slinn)
+
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/mrybs/slinn)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/t/mrybs/slinn)
+![GitHub commits difference between two branches/tags/commits](https://img.shields.io/github/commits-difference/mrybs/slinn?base=master&head=snapshots&label=master%20and%20snapshots%20difference)
+
+![GitHub repo size](https://img.shields.io/github/repo-size/mrybs/slinn)
+
+
+### Simple example
 ```python
 # localhost/app.py
 
@@ -44,23 +44,42 @@ def helloworld(request):
 
 ```
 
+### Begin project
+#### Standart
+##### Unix-like (Linux, MacOS, FreeBSD...):
+```bash
+python3 -m slinn create helloworld
+cd helloworld
+venv/bin/python manage.py create localhost host=localhost host=127.0.0.1
+venv/bin/python manage.py run 
+```
+
+##### Windows:
+```batch
+py -m slinn create helloworld
+cd helloworld
+venv\Scripts\activate
+py manage.py create localhost host=localhost host=127.0.0.1
+py manage.py run 
+```
+
 Excepted output
 ```
-$ venv/bin/python manage.py run
+helloworld $ venv/bin/python manage.py run
 Loading config...
 Apps: firstrun
 Debug mode enabled
 Smart navigation enabled
 
 Starting server...
-HTTP server is available on http://[::1]:8080/
+HTTP server is available on http://localhost:8080/
 ```
 
 To config project you should edit `./project.json`
 
 To config app you should edit `./%app%/config.json`
 
-### Create classic project
+#### Classic
 ##### Unix-like (Linux, MacOS, FreeBSD...):
 ```bash 
 mkdir helloworld 
@@ -83,11 +102,17 @@ Server(dp).listen(Address(8080))
 ```
 then write `python example.py`
 
-#### Functions:
+Excepted output
+```
+helloworld $ venv/bin/python example.py
+HTTP server is available on http://localhost:8080/
+```
+
+### Functions:
 ```python
 from slinn import Server
 
-server = Server(*dispatchers: tuple, ssl_cert: str=None, ssl_key: str=None, delay: float=0.05, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296)  # Main class to run a server
+server = Server(*dispatchers: tuple, ssl_cert: str=None, ssl_key: str=None, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296)  # Main class to run a server
 server.address(port: int, domain: str) -> str  # Returns message like 'HTTPS server is available on https://localhost:8080/'
 server.reload(*dispatchers: tuple)  # Reloads server
 server.listen(address: Address)  # Start listening address
@@ -100,12 +125,12 @@ from slinn import Address
 
 address = Address(port: int, host: str=None)  # A structure containing a port and a host; converts dns-address to ip-address
 
+Address(443, 'google.com') <-> Address(443, '2a00:1450:4010:c02::71')
+
 # Attributes
 address.port  # port
 address.host  # ip
 address.domain  # non-converted host from constructor
-
-Address(443, 'google.com') <-> Address(443, '2a00:1450:4010:c02::71')
 ```
 
 ```python

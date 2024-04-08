@@ -2,13 +2,16 @@ from slinn import Request, Address, Filter, utils
 import socket, ssl, time, os, traceback
 
 
+RED = '\u001b[31m'
+RESET = '\u001b[0m'
+
 class Server:
 	class Handle:
 		def __init__(self, filter: Filter, function):
 			self.filter = filter
 			self.function = function
 	
-	def __init__(self, *dispatchers: tuple, smart_navigation: bool=True, ssl_fullchain: str=None, ssl_key: str=None, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296):
+	def __init__(self, *dispatchers: tuple, smart_navigation: bool=True, ssl_fullchain: str=None, ssl_key: str=None, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296, _func=lambda server: None):
 		self.dispatchers = dispatchers
 		self.smart_navigation = smart_navigation
 		self.server_socket = None
@@ -19,7 +22,7 @@ class Server:
 		self.timeout = timeout
 		self.max_bytes_per_recieve = max_bytes_per_recieve
 		self.max_bytes = max_bytes
-		self.__address = None
+		self._func = _func
 
 	def reload(self, *dispatchers: tuple):
 		if self.thread is not None:
@@ -32,7 +35,7 @@ class Server:
 			
 
 	def address(self, port: int, domain: str):
-		return f'HTTP{"S" if self.ssl else ""} server is available on http{"s" if self.ssl else ""}://{"[" if ":" in host else ""}{host}{"]" if ":" in host else ""}{(":"+str(port) if port != 443 else "") if self.ssl else (":"+str(port )if port != 80 else "")}/'
+		return f'HTTP{"S" if self.ssl else ""} server is available on http{"s" if self.ssl else ""}://{"[" if ":" in domain else ""}{domain}{"]" if ":" in domain else ""}{(":"+str(port) if port != 443 else "") if self.ssl else (":"+str(port )if port != 80 else "")}/'
 		
 	def listen(self, address: Address):		
 		self.server_socket = None
@@ -41,9 +44,13 @@ class Server:
 		elif ':' in address.host:
 			self.server_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
 		else:
-			self.server_socket = socket.socket(socket.AF_INET if '.' in self.host else socket.AF_INET6, socket.SOCK_STREAM)
+			self.server_socket = socket.socket(socket.AF_INET if '.' in address.host else socket.AF_INET6, socket.SOCK_STREAM)
 		self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		self.server_socket.bind((address.host, address.port))
+		try:
+			self.server_socket.bind((address.host, address.port))
+		except PermissionError:
+			print(f'{RED}Permission denied{RESET}')
+			exit(13)
 		if self.ssl:
 			self.ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
 			self.ssl_context.load_cert_chain(certfile=self.ssl_cert, keyfile=self.ssl_key)
@@ -60,6 +67,7 @@ class Server:
 						
 	def handle_request(self, client_socket, client_address):
 		try:
+			self._func(self)
 			if self.ssl:
 				client_socket = self.ssl_context.wrap_socket(client_socket, server_side=True)
 			try:
