@@ -1,7 +1,5 @@
 # Slinn
 
----
-
 **Slinn is a HTTPS and HTTP server framework**
 
 ![License](https://img.shields.io/github/license/mrybs/slinn)
