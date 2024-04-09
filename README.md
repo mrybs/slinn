@@ -64,7 +64,7 @@ py manage.py create localhost host=localhost host=127.0.0.1
 py manage.py run 
 ```
 
-Insert example into localhost/app.py file
+Insert example into `./localhost/app.py` file
 
 Excepted output
 ```
@@ -99,7 +99,7 @@ python3 -m venv venv
 venv\Scripts\activate
 ```
 
-Insert example into `example.py` and add following code:
+Insert example into `./example.py` and add following code:
 ```
 Server(dp).listen(Address(8080))
 ```
@@ -111,7 +111,7 @@ helloworld $ venv/bin/python example.py
 HTTP server is available on http://localhost:8080/
 ```
 
-### Functions:
+### Functions
 ```python
 from slinn import Server
 
