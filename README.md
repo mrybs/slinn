@@ -1,4 +1,7 @@
-# slinn
+# Slinn
+
+---
+
 **Slinn is a HTTPS and HTTP server framework**
 
 ![License](https://img.shields.io/github/license/mrybs/slinn)
@@ -20,8 +23,6 @@
 
 ### Simple example
 ```python
-# localhost/app.py
-
 from slinn import *
 
 
@@ -63,6 +64,8 @@ py manage.py create localhost host=localhost host=127.0.0.1
 py manage.py run 
 ```
 
+Insert example into localhost/app.py file
+
 Excepted output
 ```
 helloworld $ venv/bin/python manage.py run
@@ -96,7 +99,7 @@ python3 -m venv venv
 venv\Scripts\activate
 ```
 
-You should add this code to example `example.py`
+Insert example into `example.py` and add following code:
 ```
 Server(dp).listen(Address(8080))
 ```

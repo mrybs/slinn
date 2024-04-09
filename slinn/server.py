@@ -54,11 +54,15 @@ class Server:
 		if self.ssl:
 			self.ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
 			self.ssl_context.load_cert_chain(certfile=self.ssl_cert, keyfile=self.ssl_key)
+		self.server_socket.settimeout(self.timeout)
 		self.server_socket.listen()
 		print(self.address(address.port, address.domain))
 		try:
 			while True:
-				utils.StoppableThread(target=self.handle_request, args=self.server_socket.accept()).start()
+				try:
+					utils.StoppableThread(target=self.handle_request, args=self.server_socket.accept()).start()
+				except socket.timeout:
+					pass
 		except KeyboardInterrupt:
 			print('Got KeyboardInterrupt, halting the application...')
 			if utils.check_socket(self.server_socket):
