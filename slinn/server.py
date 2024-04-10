@@ -40,7 +40,7 @@ class Server:
 	def listen(self, address: Address):		
 		self.server_socket = None
 		if socket.has_dualstack_ipv6() and '.' not in address.host and ':' not in address.host:
-			self.server_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, dualstack_ipv6=True)
+			self.server_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
 		elif ':' in address.host:
 			self.server_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
 		else:
