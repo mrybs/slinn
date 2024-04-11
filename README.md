@@ -64,6 +64,8 @@ py manage.py run
 ```
 
 Insert example into localhost/app.py file
+> [!TIP]
+> Instead of use example, create app from template `py manage.py template firstrun` on Windows and `venv/bin/python manage.py template firstrun` on Unix-like OSes
 
 Excepted output
 ```
