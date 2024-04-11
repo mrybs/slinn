@@ -39,10 +39,10 @@ class Server:
 		
 	def listen(self, address: Address):		
 		self.server_socket = None
-		if socket.has_dualstack_ipv6() and '.' not in address.host and ':' not in address.host:
-			self.server_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, dualstack_ipv6=True)
-		elif ':' in address.host:
+		if ':' in address.host:
 			self.server_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+			if socket.has_dualstack_ipv6():
+				self.server_socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
 		else:
 			self.server_socket = socket.socket(socket.AF_INET if '.' in address.host else socket.AF_INET6, socket.SOCK_STREAM)
 		self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -96,7 +96,7 @@ class Server:
 			except KeyError:
 				return print('Got KeyError, probably invalid request. Ignore')
 			except UnicodeDecodeError:
-				return print('Got UnocodeDecodeError, probably invalid request. Ignore')
+				return print('Got UnicodeDecodeError, probably invalid request. Ignore')
 			except ConnectionResetError:
 				return print('Connection reset by client')
 			except OSError:

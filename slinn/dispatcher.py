@@ -9,4 +9,5 @@ class Dispatcher:
 	def __call__(self, filter: Filter):
 		def decorator(func):
 			self.handles.append(Server.Handle(filter, func))
+			return func
 		return decorator	

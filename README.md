@@ -24,8 +24,7 @@
 from slinn import *
 
 
-dp = Dispatcher('localhost', '127.0.0.1')
-
+dp = Dispatcher()
 
 @dp(LinkFilter('api'))
 def api(request):
@@ -139,7 +138,7 @@ from slinn import Dispatcher
 
 dispatcher = Dispatcher(hosts: tuple=None)  # A class that contain many handlers
 
-Dispatcher('localhost', '127.0.0.1', '::1')
+Dispatcher('localhost', '127.0.0.1', '::1', '::')
 
 # To add handler into dispatcher
 @dispatcher(filter: Filter)
@@ -166,7 +165,7 @@ LinkFilter('user/.+/profile')
 ```python
 from slinn import HttpResponse, HttpRedirect, HttpAPIResponse, HttpJSONResponse, HttpJSONAPIResponse
 
-http_response = HttpResponse(payload: any, data: list[tuple]=None, status: str='200 OK', content_type: str='text/plain')  # This class is used to convert some data to HTTP code
+http_response = HttpResponse(payload: any, data: list[tuple[str, any]]=None, status: str='200 OK', content_type: str='text/plain')  # This class is used to convert some data to HTTP code
 http_response.set_cookie(key: str, value: any)  # Sets cookie
 http_response.make(type: str='HTTP/2.0') -> str  # Makes HTTP code
 
