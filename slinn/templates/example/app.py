@@ -1,14 +1,17 @@
-from slinn import Dispatcher, AnyFilter, LinkFilter, HttpResponse, HttpAPIResponse
+from slinn import *
 
 
 dp = Dispatcher()
 
-
 @dp(LinkFilter('api'))
 def api(request):
-    return HttpAPIResponse('{"status": "ok"}')
+    return HttpJSONAPIResponse(status='ok')
 
+@dp(LinkFilter(''))
+@dp(LinkFilter('index'))
+def index(request):
+    return HttpRedirect('/helloworld')
 
 @dp(AnyFilter)
 def helloworld(request):
-     return HttpResponse('Hello, World!')
+    return HttpResponse('Hello, world!')

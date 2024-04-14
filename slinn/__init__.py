@@ -13,4 +13,4 @@ from slinn.server import Server
 from slinn.dispatcher import Dispatcher
 
 
-version = 'Slinn Murega v2.2.9 110424B'
+version = 'Slinn Murega v2.2.11 140424A'

@@ -61,7 +61,9 @@ py manage.py create localhost host=localhost host=127.0.0.1
 py manage.py run 
 ```
 
-Insert example into `./localhost/app.py` file
+Insert example into localhost/app.py file
+> [!TIP]
+> Instead of use example, create app from template `py manage.py template example` on Windows and `venv/bin/python manage.py template example` on Unix-like OSes
 
 Excepted output
 ```
