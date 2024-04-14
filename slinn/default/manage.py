@@ -307,23 +307,25 @@ Commands%RESET%:
 			fj = json.loads(fr.read())
 			fr.close()
 			if 'apps' in fj.keys():
+				if args['name'] in fj['apps']:
+					return print(f'{BLUE}Template {args["name"]} has already installed{RESET}')
 				fj['apps'].insert(0, args['name'])
 			else:
 				fj['apps'] = []
 			fw = open('project.json', 'w')
 			fw.write(json.dumps(fj, indent=4))
 			fw.close()
-			update()
 			try:
-				shutil.copytree(f'{modulepath}templates/{args["name"]}/', f'{apppath}/{args["name"]}')
+				shutil.copytree(f'{modulepath}templates/{args["name"]}/', f'{apppath}/{args["name"]}', ignore=shutil.ignore_patterns('data'))
 				try:
-					if not os.isdir(f'{apppath}/templates_data'):
+					if not os.path.isdir(f'{apppath}/templates_data'):
 						os.mkdir(f'{apppath}/templates_data')
 					shutil.copytree(f'{modulepath}templates/{args["name"]}/data/', f'{apppath}/templates_data/{args["name"]}')
 				except  FileExistsError:
 					pass
 				except FileNotFoundError:
 					pass
+				update()
 				return print(f'{GREEN}Template {args["name"]} successfully installed{RESET}') 
 			except FileExistsError:
 				return print(f'{BLUE}Template {args["name"]} has already installed{RESET}')
