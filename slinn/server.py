@@ -1,4 +1,4 @@
-from slinn import Request, Address, Filter, utils
+from slinn import Request, Address, Filter, Logger, LogLevel, ECDispatcher, utils
 import socket, ssl, time, os, traceback
 
 
@@ -11,7 +11,7 @@ class Server:
 			self.filter = filter
 			self.function = function
 	
-	def __init__(self, *dispatchers: tuple, smart_navigation: bool=True, ssl_fullchain: str=None, ssl_key: str=None, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296, _func=lambda server: None):
+	def __init__(self, *dispatchers: tuple, smart_navigation: bool=True, ssl_fullchain: str=None, ssl_key: str=None, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296, _func=lambda server: None, logger: Logger=Logger(LogLevel.warning), ecdp: ECDispatcher=ECDispatcher()):
 		self.dispatchers = dispatchers
 		self.smart_navigation = smart_navigation
 		self.server_socket = None
@@ -23,6 +23,8 @@ class Server:
 		self.max_bytes_per_recieve = max_bytes_per_recieve
 		self.max_bytes = max_bytes
 		self._func = _func
+		self.logger = logger
+		self.ecdp = ecdp
 
 	def reload(self, *dispatchers: tuple):
 		if self.thread is not None:
@@ -32,8 +34,8 @@ class Server:
 			except RuntimeError:
 				pass
 		self.dispatchers = dispatchers
+		self.logger(LogLevel.info, 'Server has reloaded')
 			
-
 	def address(self, port: int, domain: str):
 		return f'HTTP{"S" if self.ssl else ""} server is available on http{"s" if self.ssl else ""}://{"[" if ":" in domain else ""}{domain}{"]" if ":" in domain else ""}{(":"+str(port) if port != 443 else "") if self.ssl else (":"+str(port )if port != 80 else "")}/'
 		
@@ -49,13 +51,15 @@ class Server:
 		try:
 			self.server_socket.bind((address.host, address.port))
 		except PermissionError:
-			print(f'{RED}Permission denied{RESET}')
+			if not self.logger(LogLevel.critical, 'Permission denied'):
+				print(f'{RED}Permission denied{RESET}')
 			exit(13)
 		if self.ssl:
 			self.ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
 			self.ssl_context.load_cert_chain(certfile=self.ssl_cert, keyfile=self.ssl_key)
 		self.server_socket.settimeout(self.timeout)
 		self.server_socket.listen()
+		self.logger(LogLevel.info, 'Server started to listening')
 		print(self.address(address.port, address.domain))
 		try:
 			while True:
@@ -92,41 +96,50 @@ class Server:
 					return
 
 				request = Request(header, content, client_address, client_socket)
-				print(repr(request))
+				self.logger(LogLevel.info, repr(request))
 			except KeyError:
-				return print('Got KeyError, probably invalid request. Ignore')
+				self.logger(LogLevel.info, 'Got KeyError, probably invalid request. Ignore')
 			except UnicodeDecodeError:
-				return print('Got UnicodeDecodeError, probably invalid request. Ignore')
+				self.logger(LogLevel.info, 'Got UnicodeDecodeError, probably invalid request. Ignore')
 			except ConnectionResetError:
-				return print('Connection reset by client')
+				self.logger(LogLevel.info, 'Connection reset by client')
 			except OSError:
-				return print('Connection closed')
+				self.logger(LogLevel.info, 'Connection closed')
 			for dispatcher in self.dispatchers:
 				if True in [utils.restartswith(request.host, host) for host in dispatcher.hosts]:
 					if self.smart_navigation:
 						sizes = [handle.filter.size(request.link, request.method) for handle in dispatcher.handles]
 						if sizes != []:
-							handle = dispatcher.handles[sizes.index(max(sizes))]
-							if handle.filter.check(request.link, request.method):
-								if utils.check_socket(client_socket):
-                  response = handle.function(request)
-                  if response is not None:
-                    client_socket.sendall(response.make(request.version))
-                  client_socket.close()
+							if self.answer_request(client_socket, dispatcher.handles[sizes.index(max(sizes))], request, data, header, content):
 								return
 					else:
 						for handle in dispatcher.handles:
-							if handle.filter.check(request.link, request.method):
-								if utils.check_socket(client_socket):
-                  if response is not None:
-                    client_socket.sendall(handle.function(request).make(request.version))
-                  client_socket.close()
+							if self.answer_request(client_socket, handle, request, data, header, content):
 								return
-		except ssl.SSLError:
-			print('During handling request, an exception has occured:')
-			traceback.print_exc()
-			print('Got ssl.SSLError, reloading...')
+		except Exception as exception:
+			self.logger(LogLevel.warning, f'During handling request, an {exception} has occured')
+			self.logger(LogLevel.warning, traceback.extract_stack())
 			self.reload(*self.dispatchers)
-		except Exception:
-			print('During handling request, an exception has occured:')
-			traceback.print_exc()
+
+	def answer_request(self, client_socket, handle, request, http_data, http_header, http_content):
+		if handle.filter.check(request.link, request.method):
+			if utils.check_socket(client_socket):
+				response = utils.optional(handle.function, 
+									request=request, 
+									http_data=http_data, 
+									http_header=http_header, 
+									http_content=http_content,
+									client_socket=client_socket)
+				if type(response) == int:
+					if response < 99 or response > 599:
+						raise ValueError(f'Error code {response} does not exist')
+					handle = self.ecdp(response)
+					if handle is not None:
+						return self.answer_request(client_socket, handle, request, http_data, http_header, http_content)
+					self.logger(LogLevel.error, f'Error code {response} `s handler is not defined')
+				elif response is not None:
+					client_socket.sendall(response.make(request.version))
+				client_socket.close()
+			return True
+		return False
+

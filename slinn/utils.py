@@ -1,4 +1,4 @@
-import re, threading, socket
+import re, threading, socket, inspect
 
 
 class StoppableThread(threading.Thread):
@@ -12,6 +12,21 @@ class StoppableThread(threading.Thread):
     def stopped(self):
         return self._stop_event.is_set()
 
+
+def optional(func, *args, **kwargs):
+	_args, _kwargs, k= [], {}, {}
+	s = str(inspect.signature(func))[1:-1].split(',')
+	for key in kwargs.keys():
+		if key in s:
+			k[key] = kwargs[key]
+	kwargs = k
+	if len(s) < len(args):
+		_args = args[:-len(s)]
+	elif len(s) < len(args) + len(kwargs):
+		_args, _kwargs = args[:-len(s)], {list(kwargs.keys())[i]: kwargs[list(kwargs.keys())[i]] for i in range(len(kwargs)-len(s)-len(args))}
+	else:
+		_args, _kwargs = args, kwargs
+	func(*_args, **_kwargs)
 
 def restartswith(text: str, reg: str):
 	buf, largest = '', None
