@@ -9,3 +9,4 @@ class Address:
 			self.host = sockaddr[0]
 		else:
 			self.host = ''
+		self.domain = host

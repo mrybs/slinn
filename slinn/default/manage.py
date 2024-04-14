@@ -147,7 +147,6 @@ def main():
 			apps = cfg['apps'] if 'apps' in cfg.keys() else []
 			port = cfg['port'] if 'port' in cfg.keys() else 8080
 			host = cfg['host'] if 'host' in cfg.keys() else ''
-			delay = float(cfg['delay']) if 'delay' in cfg.keys() else 0.05
 			timeout = float(cfg['timeout']) if 'timeout' in cfg.keys() else 0.03
 			max_bytes_per_recieve = int(cfg['max_bytes_per_recieve']) if 'max_bytes_per_recieve' in cfg.keys() else 4096
 			max_bytes = int(cfg['max_bytes']) if 'max_bytes' in cfg.keys() else 4294967296
@@ -181,27 +180,27 @@ def main():
 				return hashlib.md5(''.join([checksum for checksum in get_dir_checksums(dir)]).encode()).hexdigest()
 			global checksum
 			checksum = get_dir_checksum('.')
+
 			reloader = """
-def reloader(server, delay=0.3):
-	import time, importlib
-	def runtime(delay, server):
-		global checksum
-		while True:
-			if checksum != get_dir_checksum('.'):
-				checksum = get_dir_checksum('.')
-				"""
+def reloader(server):
+	import importlib, traceback
+	global checksum
+	try:
+		if checksum != get_dir_checksum('.'):
+			checksum = get_dir_checksum('.')
+			"""
 			for app in cfg['apps']:
 				if not app_config(app)['debug'] or debug:
 					reloader += app_reload(app)
 			reloader += """
-				print('\\n\\nServer updated')
-				print(server.address())
-				server.reload("""
+			server.reload("""
 			reloader += ",".join(dps)
 			reloader += """)
-			time.sleep(delay)
-	import threading;threading.Thread(target=runtime, args=(delay, server)).start()
+	except Exception:
+		print('During handling request, an exception has occured:')
+		traceback.print_exc()
 """
+
 			apps_info = []
 			for app in cfg['apps']:
 				if not app_config(app)['debug'] or debug:
@@ -211,11 +210,10 @@ def reloader(server, delay=0.3):
 			print(f'{GRAY}Apps: ' + ', '.join(apps_info))
 			print('Debug mode ' + 'enabled' if debug else 'disabled')
 			print('Smart navigation ' + ('enabled' if smart_navigation else 'disabled'))
-			print(f'Delay: {str(delay*1000)}ms')
 			print(RESET)
 
 			print('Starting server...')
-			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key}, delay={delay}, timeout={timeout}, max_bytes_per_recieve={max_bytes_per_recieve}, max_bytes={max_bytes});reloader(server=server);server.listen(Address({port}, "{host}"))'
+			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key}, timeout={timeout}, max_bytes_per_recieve={max_bytes_per_recieve}, max_bytes={max_bytes}, _func=reloader);server.listen(Address({port}, "{host}"))'
 			exec(start)
 		elif sys.argv[1].lower() == 'create':
 			args = get_args(['name', 'host'], ' '.join(sys.argv[2:]))
@@ -309,23 +307,25 @@ Commands%RESET%:
 			fj = json.loads(fr.read())
 			fr.close()
 			if 'apps' in fj.keys():
+				if args['name'] in fj['apps']:
+					return print(f'{BLUE}Template {args["name"]} has already installed{RESET}')
 				fj['apps'].insert(0, args['name'])
 			else:
 				fj['apps'] = []
 			fw = open('project.json', 'w')
 			fw.write(json.dumps(fj, indent=4))
 			fw.close()
-			update()
 			try:
-				shutil.copytree(f'{modulepath}templates/{args["name"]}/', f'{apppath}/{args["name"]}')
+				shutil.copytree(f'{modulepath}templates/{args["name"]}/', f'{apppath}/{args["name"]}', ignore=shutil.ignore_patterns('data'))
 				try:
-					if not os.isdir(f'{apppath}/templates_data'):
+					if not os.path.isdir(f'{apppath}/templates_data'):
 						os.mkdir(f'{apppath}/templates_data')
 					shutil.copytree(f'{modulepath}templates/{args["name"]}/data/', f'{apppath}/templates_data/{args["name"]}')
 				except  FileExistsError:
 					pass
 				except FileNotFoundError:
 					pass
+				update()
 				return print(f'{GREEN}Template {args["name"]} successfully installed{RESET}') 
 			except FileExistsError:
 				return print(f'{BLUE}Template {args["name"]} has already installed{RESET}')

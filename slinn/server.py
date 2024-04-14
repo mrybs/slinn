@@ -1,6 +1,9 @@
 from slinn import Request, Address, Filter, utils
-import socket, ssl, threading, time, traceback, os
+import socket, ssl, time, os, traceback
 
+
+RED = '\u001b[31m'
+RESET = '\u001b[0m'
 
 class Server:
 	class Handle:
@@ -8,24 +11,20 @@ class Server:
 			self.filter = filter
 			self.function = function
 	
-	def __init__(self, *dispatchers: tuple, smart_navigation: bool=True, ssl_fullchain: str=None, ssl_key: str=None, delay: float=0.05, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296):
+	def __init__(self, *dispatchers: tuple, smart_navigation: bool=True, ssl_fullchain: str=None, ssl_key: str=None, timeout: float=0.03, max_bytes_per_recieve: int=4096, max_bytes: int=4294967296, _func=lambda server: None):
 		self.dispatchers = dispatchers
 		self.smart_navigation = smart_navigation
 		self.server_socket = None
 		self.ssl = ssl_fullchain is not None and ssl_key is not None
 		self.ssl_cert, self.ssl_key = ssl_fullchain, ssl_key
 		self.ssl_context = None
-		self.waiting = False
-		self.running = True
 		self.thread = None
-		self.delay = delay
 		self.timeout = timeout
 		self.max_bytes_per_recieve = max_bytes_per_recieve
 		self.max_bytes = max_bytes
-		self.__address = None
+		self._func = _func
 
 	def reload(self, *dispatchers: tuple):
-		self.waiting = True
 		if self.thread is not None:
 			self.thread.stop()
 			try:
@@ -33,54 +32,48 @@ class Server:
 			except RuntimeError:
 				pass
 		self.dispatchers = dispatchers
-		if self.running:
-			self.server_socket.close()
-			self.running = False
-		if self.__address is not None:
-			self.listen(self.__address)
-		self.waiting = False
+			
 
-	def address(self):
-		return f'HTTP{"S" if self.ssl else ""} server is available on http{"s" if self.ssl else ""}://{"" if "." in self.host else "["}{self.host}{"" if "." in self.host else "]"}{(":"+str(self.port) if self.port != 443 else "") if self.ssl else (":"+str(self.port )if self.port != 80 else "")}/'
+	def address(self, port: int, domain: str):
+		return f'HTTP{"S" if self.ssl else ""} server is available on http{"s" if self.ssl else ""}://{"[" if ":" in domain else ""}{domain}{"]" if ":" in domain else ""}{(":"+str(port) if port != 443 else "") if self.ssl else (":"+str(port )if port != 80 else "")}/'
 		
 	def listen(self, address: Address):		
-		self.__address = address
-		self.host, self.port = address.host, address.port
-		if socket.has_dualstack_ipv6() and '.' not in self.host and ':' not in self.host:
-			self.server_socket = socket.create_server((self.host, self.port), family=socket.AF_INET6, dualstack_ipv6=True)
-		elif ':' in self.host:
-			self.server_socket = socket.create_server((self.host, self.port), family=socket.AF_INET6)
+		self.server_socket = None
+		if ':' in address.host:
+			self.server_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+			if socket.has_dualstack_ipv6():
+				self.server_socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
 		else:
-			self.server_socket = socket.create_server((self.host, self.port), family=(socket.AF_INET if '.' in self.host else socket.AF_INET6))
+			self.server_socket = socket.socket(socket.AF_INET if '.' in address.host else socket.AF_INET6, socket.SOCK_STREAM)
 		self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		try:
+			self.server_socket.bind((address.host, address.port))
+		except PermissionError:
+			print(f'{RED}Permission denied{RESET}')
+			exit(13)
 		if self.ssl:
 			self.ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
 			self.ssl_context.load_cert_chain(certfile=self.ssl_cert, keyfile=self.ssl_key)
-		self.running = True
+		self.server_socket.settimeout(self.timeout)
 		self.server_socket.listen()
-		print(self.address())
+		print(self.address(address.port, address.domain))
 		try:
-			while self.running:
-				if not self.waiting:
-					self.thread = utils.StoppableThread(target=self.handle_request)
-					self.thread.start()
-				time.sleep(self.delay)
+			while True:
+				try:
+					utils.StoppableThread(target=self.handle_request, args=self.server_socket.accept()).start()
+				except socket.timeout:
+					pass
 		except KeyboardInterrupt:
 			print('Got KeyboardInterrupt, halting the application...')
-			if self.running:
+			if utils.check_socket(self.server_socket):
 				self.server_socket.close()
-				self.running = False
 			os._exit(0)
 						
-	def handle_request(self):
+	def handle_request(self, client_socket, client_address):
 		try:
-			if not self.running:
-				return
-			self.waiting = True
-			client_socket, client_address = self.server_socket.accept()
+			self._func(self)
 			if self.ssl:
 				client_socket = self.ssl_context.wrap_socket(client_socket, server_side=True)
-			self.waiting = False
 			try:
 				client_socket.settimeout(self.timeout)
 				data = bytearray()
@@ -103,7 +96,7 @@ class Server:
 			except KeyError:
 				return print('Got KeyError, probably invalid request. Ignore')
 			except UnicodeDecodeError:
-				return print('Got UnocodeDecodeError, probably invalid request. Ignore')
+				return print('Got UnicodeDecodeError, probably invalid request. Ignore')
 			except ConnectionResetError:
 				return print('Connection reset by client')
 			except OSError:
@@ -115,25 +108,25 @@ class Server:
 						if sizes != []:
 							handle = dispatcher.handles[sizes.index(max(sizes))]
 							if handle.filter.check(request.link, request.method):
-								response = handle.function(request)
-								if response is not None:
-									client_socket.sendall(response.make(request.version))
-								client_socket.close()
+								if utils.check_socket(client_socket):
+                  response = handle.function(request)
+                  if response is not None:
+                    client_socket.sendall(response.make(request.version))
+                  client_socket.close()
 								return
 					else:
 						for handle in dispatcher.handles:
 							if handle.filter.check(request.link, request.method):
-								if response is not None:
-									client_socket.sendall(handle.function(request).make(request.version))
-								client_socket.close()
+								if utils.check_socket(client_socket):
+                  if response is not None:
+                    client_socket.sendall(handle.function(request).make(request.version))
+                  client_socket.close()
 								return
 		except ssl.SSLError:
 			print('During handling request, an exception has occured:')
 			traceback.print_exc()
-			self.waiting = False
 			print('Got ssl.SSLError, reloading...')
-			self.reload(self.dispatchers)
+			self.reload(*self.dispatchers)
 		except Exception:
 			print('During handling request, an exception has occured:')
 			traceback.print_exc()
-			self.waiting = False
