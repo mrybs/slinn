@@ -6,11 +6,20 @@ from slinn.file import File
 from slinn.request import Request
 from slinn.http_response import HttpResponse
 from slinn.http_redirect import HttpRedirect
+from slinn.http_render import HttpRender
 from slinn.http_api_response import HttpAPIResponse
 from slinn.http_json_response import HttpJSONResponse
 from slinn.http_json_api_response import HttpJSONAPIResponse
+from slinn.preprocessor import Preprocessor
 from slinn.server import Server
 from slinn.dispatcher import Dispatcher
 
 
-version = 'Slinn Murega v2.2.11 140424A'
+version = 'Slinn Nukeful v2.3.0 070424B'
+
+Response = HttpResponse
+APIResponse = HttpAPIResponse
+JSONResponse = HttpJSONResponse
+JSONAPIResponse = HttpJSONAPIResponse
+Redirect = HttpRedirect
+Render = HttpRender

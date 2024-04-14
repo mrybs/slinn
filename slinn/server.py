@@ -91,8 +91,8 @@ class Server:
 				if header == '':
 					return
 
-				request = Request(header, content, client_address)
-				print(request)
+				request = Request(header, content, client_address, client_socket)
+				print(repr(request))
 			except KeyError:
 				return print('Got KeyError, probably invalid request. Ignore')
 			except UnicodeDecodeError:
@@ -109,15 +109,18 @@ class Server:
 							handle = dispatcher.handles[sizes.index(max(sizes))]
 							if handle.filter.check(request.link, request.method):
 								if utils.check_socket(client_socket):
-									client_socket.sendall(handle.function(request).make(request.version))
-									client_socket.close()
+                  response = handle.function(request)
+                  if response is not None:
+                    client_socket.sendall(response.make(request.version))
+                  client_socket.close()
 								return
 					else:
 						for handle in dispatcher.handles:
 							if handle.filter.check(request.link, request.method):
 								if utils.check_socket(client_socket):
-									client_socket.sendall(handle.function(request).make(request.version))
-									client_socket.close()
+                  if response is not None:
+                    client_socket.sendall(handle.function(request).make(request.version))
+                  client_socket.close()
 								return
 		except ssl.SSLError:
 			print('During handling request, an exception has occured:')

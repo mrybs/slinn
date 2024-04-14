@@ -42,7 +42,7 @@ class Request:
 			files[-1].data += line + b'\r\n'
 		return files[:-1]
 
-	def __init__(self, header: str, body: bytes, client_address: tuple[str, int]):
+	def __init__(self, header: str, body: bytes, client_address: tuple[str, int], client_socket):
 		def get_args(text):
 				return {} if text == '' else {pair.split('=')[0]: '='.join(pair.split('=')[1:]) for pair in text.split('&')}
 		
@@ -52,17 +52,28 @@ class Request:
 		self.files = self.parse_http_body(body)
 		self.header['data'].update(header)
 		self.ip, self.port = client_address[:2]
+		self.protocol = self.header['ver'].split('/')[0]
 		self.method = self.header['method']
-		self.version = self.header["ver"]
-		self.full_link = urllib.parse.unquote_plus(self.header["link"].replace('+', ' '))
-		self.host = self.header["data"]["Host"]
-		self.user_agent = self.header["data"]["User-Agent"] if 'User-Agent' in self.header['data'].keys() else self.header['data']['user-agent']
-		self.accept = self.header["data"]["Accept"].split(',')
-		self.encoding = self.header["data"]["Accept-Encoding"].split(',')
-		self.language = self.header["data"]["Accept-Language"].split(',')
+		self.version = self.header['ver']
+		self.full_link = urllib.parse.unquote_plus(self.header['link'].replace('+', ' '))
+		self.host = self.header['data']['Host']
+		self.user_agent = self.header['data']['User-Agent'] if 'User-Agent' in self.header['data'].keys() else self.header['data']['user-agent']
+		self.accept = self.header['data']['Accept'].split(',')
+		self.encoding = self.header['data']['Accept-Encoding'].split(',')
+		self.language = self.header['data']['Accept-Language'].split(',')
 		self.link = self.full_link[:(self.full_link.index('?') if '?' in self.full_link else None)]
 		self.args = get_args(self.full_link[(self.full_link.index('?')+1 if '?' in self.full_link else len(self.full_link)):])
-		self.cookies = {c.split('=')[0]:c.split('=')[1] for c in self.header["data"]["Cookie"].split(';')} if 'Cookie' in self.header['data'] else []
+		self.cookies = {c.split('=')[0]:c.split('=')[1] for c in self.header['data']['Cookie'].split(';')} if 'Cookie' in self.header['data'] else []
 
-	def __str__(self):
+		self.__str__ = self.__repr__
+
+		self.client_socket = client_socket
+
+	def __repr__(self):
 		return f'{self.GRAY}[{self.method}]{self.RESET} request {self.full_link} from {"" if "." in self.ip else "["}{self.ip}{"" if "." in self.ip else "]"}:{self.port} on {self.host}'
+
+	def respond(self, response_class, *args, **kwargs):
+		self.client_socket.sendall(response_class(*args, **kwargs).make())
+
+	# def set_cookie(self, response_class, *args, **kwargs):
+	#	self.client_socket.sendall(response_class(*args, **kwargs).make())
