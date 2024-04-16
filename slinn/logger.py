@@ -1,4 +1,6 @@
-import enum, datetime
+import datetime
+import enum
+
 
 class LogLevel(enum.Enum):
     info = 0
@@ -6,8 +8,9 @@ class LogLevel(enum.Enum):
     error = 2
     critical = 3
 
+
 class Logger:
-    def __init__(self, min_log_level: LogLevel):
+    def __init__(self, min_log_level: LogLevel) -> None:
         self.min_log_level = min_log_level
 
     def __call__(self, log_level: LogLevel, message: str) -> bool:

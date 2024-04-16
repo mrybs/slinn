@@ -13,11 +13,12 @@ from slinn.http_api_response import HttpAPIResponse
 from slinn.http_json_response import HttpJSONResponse
 from slinn.http_json_api_response import HttpJSONAPIResponse
 from slinn.preprocessor import Preprocessor
+from slinn.ecdispatcher import ECDispatcher
 from slinn.server import Server
 from slinn.dispatcher import Dispatcher
 
 
-version = 'Slinn Nukeful v2.3.0 140424A'
+version = 'Slinn Nukeful v2.3.0 160424A'
 
 Response = HttpResponse
 Redirect = HttpRedirect
