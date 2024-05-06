@@ -3,7 +3,6 @@
 **Slinn is a HTTPS and HTTP server framework**
 
 ![License](https://img.shields.io/github/license/mrybs/slinn)
-![Test passing](https://img.shields.io/badge/works_on_my_server-2BD331)
 
 ![GitHub Release](https://img.shields.io/github/v/release/mrybs/slinn)
 ![GitHub top language](https://img.shields.io/github/languages/top/mrybs/slinn)
@@ -14,7 +13,6 @@
 
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/mrybs/slinn)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/t/mrybs/slinn)
-![GitHub commits difference between two branches/tags/commits](https://img.shields.io/github/commits-difference/mrybs/slinn?base=master&head=snapshots&label=master%20and%20snapshots%20difference)
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/mrybs/slinn)
 
