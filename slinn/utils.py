@@ -1,4 +1,4 @@
-import re, threading, socket, inspect
+import re, threading, socket, inspect, json
 
 
 class StoppableThread(threading.Thread):
@@ -15,7 +15,7 @@ class StoppableThread(threading.Thread):
 
 def optional(func, *args, **kwargs) -> any:
     _args, _kwargs, k = [], {}, {}
-    s = str(inspect.signature(func))[1:-1].split(',')
+    s = [arg.split(':')[0] for arg in ')'.join('('.join(str(inspect.signature(func)).split('(')[1:]).split(')')[:-1]).split(',')]
     for key in kwargs.keys():
         if key in s:
             k[key] = kwargs[key]
@@ -65,3 +65,23 @@ def min_restartswith_size(text: str, reg: str) -> int:
 
 def check_socket(sock) -> bool:
     return sock.getsockopt(socket.SOL_SOCKET, socket.SO_ERROR) == 0
+
+def representate(obj: any) -> str:
+    if type(obj) == dict:
+        return json.dumps({key:representate(obj[key]) for key in obj.keys()})
+    if type(obj) in [list, tuple, set]:
+        return ', '.join([representate(elem) for elem in obj])
+    if type(obj) == str:
+        return obj
+    if type(obj) == bytes:
+        return obj.decode()
+    if type(obj) in [int, float]:
+        return str(obj)
+    if type(obj) == bool:
+        return 'true' if obj else 'false'
+    if type(obj).__str__ != object.__str__ or type(obj).__repr__ != object.__repr__:
+        try: return str(obj)
+        except Exception: pass
+    try: return json.dumps({key:representate(obj.__dict__[key]) for key in obj.__dict__.keys()})
+    except Exception as e: print(e)
+    return f'<{type(obj)} object at {id(obj)}>'

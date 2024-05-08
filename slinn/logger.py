@@ -23,8 +23,8 @@ class Logger:
         self.out = out
 
     def __call__(self, log_level: LogLevel, message: str) -> bool:
-        if log_level.value > self.min_log_level.value:
-            self.out.write(f'[{log_level.name}] "{message}" at {datetime.datetime.now()}')
+        if log_level.value >= self.min_log_level.value:
+            self.out.write(f'[{log_level.name} at {datetime.datetime.now()}] {message}\n')
             self.out.flush()
             return True
         return False

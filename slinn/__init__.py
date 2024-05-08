@@ -16,9 +16,10 @@ from slinn.preprocessor import Preprocessor
 from slinn.hcdispatcher import HCDispatcher
 from slinn.server import Server
 from slinn.dispatcher import Dispatcher
+from slinn import utils
 
 
-version = 'Slinn Nukeful v2.3.0 080524A'
+version = 'Slinn Nukeful v2.3.0 090524A'
 
 Response = HttpResponse
 Redirect = HttpRedirect

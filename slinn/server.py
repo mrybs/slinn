@@ -1,6 +1,7 @@
 from __future__ import annotations
-from slinn import Request, Address, Filter, Logger, LogLevel, ECDispatcher, utils
-import socket, ssl, time, os, traceback
+from slinn import Request, Address, Filter, Logger, LogLevel, HCDispatcher, utils
+import socket, ssl, os, traceback
+
 
 RED = '\u001b[31m'
 RESET = '\u001b[0m'
@@ -15,10 +16,10 @@ class Server:
             self.filter = filter
             self.function = function
 
-    def __init__(self, *dispatchers: tuple[Dispatcher, ...], smart_navigation: bool = True, ssl_fullchain: str = None,
+    def __init__(self, *dispatchers: tuple[Dispatcher, ...], smart_navigation: bool = True, ssl_fullchain: str = None, # type: ignore
                  ssl_key: str = None, timeout: float = 0.03, max_bytes_per_recieve: int = 4096,
                  max_bytes: int = 4294967296, _func=lambda server: None, logger: Logger = Logger(LogLevel.warning),
-                 ecdp: ECDispatcher = ECDispatcher()) -> None:
+                 ecdp: HCDispatcher = HCDispatcher()) -> None:
         self.dispatchers = dispatchers
         self.smart_navigation = smart_navigation
         self.server_socket = None
