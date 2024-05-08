@@ -2,6 +2,9 @@ import slinn, gzip
 
 
 class HttpResponse:
+    """
+    Base class for all responses
+    """
     def __init__(self, payload: any, data: list[tuple] = None, status: str = '200 OK',
                  content_type: str = 'text/plain') -> None:
         self.payload = str(payload).encode() if type(payload) in [str, int, float, bool] else bytes(payload)

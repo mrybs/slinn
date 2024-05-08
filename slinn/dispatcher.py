@@ -3,6 +3,9 @@ from slinn import Server, Filter, LinkFilter
 
 
 class Dispatcher:
+    """
+    Class for handling requests
+    """
     def __init__(self, *hosts: tuple) -> None:
         self.handles = []
         self.hosts = hosts if list(hosts) != [] else ['.*']

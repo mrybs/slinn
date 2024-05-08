@@ -7,6 +7,9 @@ RESET = '\u001b[0m'
 
 
 class Server:
+    """
+    Main class to start server
+    """
     class Handle:
         def __init__(self, filter: Filter, function):
             self.filter = filter

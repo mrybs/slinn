@@ -2,6 +2,9 @@ import re
 
 
 class Preprocessor:
+    """
+    Pages preprocessor
+    """
     def __init__(self, open_quote: str = '<%', close_quote: str = '%>') -> None:
         self.open_quote = open_quote
         self.close_quote = close_quote

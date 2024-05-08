@@ -1,4 +1,7 @@
-class ECDispatcher:
+class HCDispatcher:
+    """
+    Class for handling HTTP-codes
+    """
     def __init__(self) -> None:
         self.functions = {}
 

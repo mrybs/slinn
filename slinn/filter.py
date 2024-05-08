@@ -2,6 +2,9 @@ from slinn import utils
 
 
 class Filter:
+    """
+    Base class for filtering requests
+    """
     def __init__(self, filter: str, methods: tuple = None) -> None:
         self.filter = filter
         self.methods = ('GET', 'POST') if methods is None else methods

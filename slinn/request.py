@@ -3,6 +3,9 @@ from slinn import File
 
 
 class Request:
+    """
+    Representation of HTTP request from client
+    """
     RESET = '\u001b[0m'
     GRAY = '\u001b[38;2;127;127;127m'
 
