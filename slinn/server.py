@@ -43,8 +43,11 @@ class Server:
         self.dispatchers = dispatchers
         self.logger(LogLevel.info, 'Server has reloaded')
 
-    def address(self, port: int, domain: str) -> str:
-        return f'HTTP{"S" if self.ssl else ""} server is available on http{"s" if self.ssl else ""}://{"[" if ":" in domain else ""}{domain}{"]" if ":" in domain else ""}{(":" + str(port) if port != 443 else "") if self.ssl else (":" + str(port) if port != 80 else "")}/'
+    def address(self, port: int, domain: str=None):
+        protocol = 'https' if self.ssl else 'http'
+        return (f'{protocol.upper()} server is available on {protocol}://'+
+               ('0.0.0.0' if (domain is None or domain == '') else ('['+domain+']' if ':' in domain else domain))+
+               f'{(":"+str(port) if port != 443 else "") if self.ssl else (":"+str(port )if port != 80 else "")}/')
 
     def listen(self, address: Address):
         self.server_socket = None
@@ -103,7 +106,6 @@ class Server:
 
                 if header == '':
                     return
-
                 request = Request(header, content, client_address, client_socket)
                 self.logger(LogLevel.info, repr(request))
             except KeyError:
