@@ -19,7 +19,7 @@ from slinn.dispatcher import Dispatcher
 from slinn import utils
 
 
-version = 'Slinn Nukeful v2.3.0 090524A'
+version = 'Slinn Nukeful v2.3.0 100524A'
 
 Response = HttpResponse
 Redirect = HttpRedirect
