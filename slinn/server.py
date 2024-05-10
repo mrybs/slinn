@@ -7,10 +7,6 @@ import logging
 import traceback
 
 
-RED = '\u001b[31m'
-RESET = '\u001b[0m'
-
-
 class Server:
     
     """
@@ -39,6 +35,7 @@ class Server:
         self._func = _func
         self.logger = logger
         self.ecdp = ecdp
+        
 
     def reload(self, *dispatchers: tuple) -> None:
         if self.thread is not None:
@@ -69,7 +66,7 @@ class Server:
         try:
             self.server_socket.bind((address.host, address.port))
         except PermissionError:
-            self.logger.critical(f'{RED}Permission denied{RESET}')
+            self.logger.critical(f'Permission denied')
             exit(13)
         if self.ssl:
             self.ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)

@@ -7,9 +7,6 @@ class Request:
     """
     Representation of HTTP request from client
     """
-    
-    RESET = '\u001b[0m'
-    GRAY = '\u001b[38;2;127;127;127m'
 
     @staticmethod
     def parse_http_header(http_header: str) -> dict:
@@ -80,7 +77,7 @@ class Request:
         self.client_socket = client_socket
 
     def __repr__(self) -> str:
-        return f'{self.GRAY}[{self.method}]{self.RESET} request {self.full_link} from {"" if "." in self.ip else "["}{self.ip}{"" if "." in self.ip else "]"}:{self.port} on {self.host}'
+        return f'[{self.method}] request {self.full_link} from {"" if "." in self.ip else "["}{self.ip}{"" if "." in self.ip else "]"}:{self.port} on {self.host}'
 
     def respond(self, response_class, *args, **kwargs) -> None:
         self.client_socket.sendall(response_class(*args, **kwargs).make())
