@@ -143,6 +143,7 @@ def main():
 			
 			print('Loading config...')
 			cfg = config()
+			name = cfg["name"] if "name" in cfg.keys() else "slinn"
 			debug = cfg["debug"] if "debug" in cfg.keys() else False
 			apps = cfg['apps'] if 'apps' in cfg.keys() else []
 			port = cfg['port'] if 'port' in cfg.keys() else 8080
@@ -213,7 +214,7 @@ def reloader(server):
 			print(RESET)
 
 			print('Starting server...')
-			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key}, timeout={timeout}, max_bytes_per_recieve={max_bytes_per_recieve}, max_bytes={max_bytes}, _func=reloader);server.listen(Address({port}, "{host}"))'
+			start = f"import logging;logging.basicConfig(filename='{name}.log', level=logging.INFO);"+';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key}, timeout={timeout}, max_bytes_per_recieve={max_bytes_per_recieve}, max_bytes={max_bytes}, _func=reloader);server.listen(Address({port}, "{host}"))'
 			exec(start)
 		elif sys.argv[1].lower() == 'create':
 			args = get_args(['name', 'host'], ' '.join(sys.argv[2:]))

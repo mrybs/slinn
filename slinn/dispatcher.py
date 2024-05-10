@@ -10,7 +10,7 @@ class Dispatcher:
     
     def __init__(self, *hosts: tuple) -> None:
         self.handles = []
-        self.hosts = hosts if hosts != () else ('.*')
+        self.hosts = hosts if hosts != () else ('.*', )
 
     def __call__(self, regexp: Filter) -> callable:
         def wrapper(func):

@@ -18,4 +18,4 @@ def styles(request: Request) -> None:
 
 @dp(AnyFilter)
 def index(request: Request) -> None:
-    request.respond(Response, read('templates_data/firstrun/slinn.html').replace('{% version %}', version.split()[2]))
+    request.respond(Response, read('templates_data/firstrun/slinn.html').replace('{% version %}', version.split()[2]), content_type='text/html')

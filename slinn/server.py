@@ -1,6 +1,10 @@
 from __future__ import annotations
-from slinn import Request, Address, Filter, Logger, LogLevel, HCDispatcher, utils
-import socket, ssl, os, traceback
+from slinn import Request, Address, Filter, HCDispatcher, utils
+import socket
+import ssl
+import os
+import logging
+import traceback
 
 
 RED = '\u001b[31m'
@@ -20,7 +24,7 @@ class Server:
 
     def __init__(self, *dispatchers: tuple[Dispatcher, ...], smart_navigation: bool = True, ssl_fullchain: str = None, # type: ignore
                  ssl_key: str = None, timeout: float = 0.03, max_bytes_per_recieve: int = 4096,
-                 max_bytes: int = 4294967296, _func=lambda server: None, logger: Logger = Logger(LogLevel.info),
+                 max_bytes: int = 4294967296, _func=lambda server: None, logger: logging.Logger = logging.getLogger(),
                  ecdp: HCDispatcher = HCDispatcher()) -> None:
         self.dispatchers = dispatchers
         self.smart_navigation = smart_navigation
@@ -44,7 +48,7 @@ class Server:
             except RuntimeError:
                 pass
         self.dispatchers = dispatchers
-        self.logger(LogLevel.info, 'Server has reloaded')
+        self.logger.info('Server has reloaded')
 
     def address(self, port: int, domain: str=None):
         protocol = 'https' if self.ssl else 'http'
@@ -65,15 +69,14 @@ class Server:
         try:
             self.server_socket.bind((address.host, address.port))
         except PermissionError:
-            if not self.logger(LogLevel.critical, 'Permission denied'):
-                print(f'{RED}Permission denied{RESET}')
+            self.logger.critical(f'{RED}Permission denied{RESET}')
             exit(13)
         if self.ssl:
             self.ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
             self.ssl_context.load_cert_chain(certfile=self.ssl_cert, keyfile=self.ssl_key)
         self.server_socket.settimeout(self.timeout)
         self.server_socket.listen()
-        self.logger(LogLevel.info, 'Server started to listening')
+        self.logger.info('Server started to listening')
         print(self.address(address.port, address.domain))
         try:
             while True:
@@ -82,7 +85,7 @@ class Server:
                 except socket.timeout:
                     pass
         except KeyboardInterrupt:
-            print('Got KeyboardInterrupt, halting the application...')
+            self.logger.critical('Got KeyboardInterrupt, halting the application...')
             if utils.check_socket(self.server_socket):
                 self.server_socket.close()
             os._exit(0)
@@ -110,15 +113,15 @@ class Server:
                 if header == '':
                     return
                 request = Request(header, content, client_address, client_socket)
-                self.logger(LogLevel.info, repr(request))
+                self.logger.info(repr(request))
             except KeyError:
-                return self.logger(LogLevel.info, 'Got KeyError, probably invalid request. Ignore')
+                return self.logger.info('Got KeyError, probably invalid request. Ignore')
             except UnicodeDecodeError:
-                return self.logger(LogLevel.info, 'Got UnicodeDecodeError, probably invalid request. Ignore')
+                return self.logger.info('Got UnicodeDecodeError, probably invalid request. Ignore')
             except ConnectionResetError:
-                return self.logger(LogLevel.info, 'Connection reset by client')
+                return self.logger.info('Connection reset by client')
             except OSError:
-                return self.logger(LogLevel.info, 'Connection closed')
+                return self.logger.info('Connection closed')
             for dispatcher in self.dispatchers:
                 if True in [utils.restartswith(request.host, host) for host in dispatcher.hosts]:
                     if self.smart_navigation:
@@ -132,8 +135,8 @@ class Server:
                             if self.answer_request(client_socket, handle, request, data, header, content):
                                 return
         except Exception as exception:
-            self.logger(LogLevel.warning, f'During handling request, an {exception} has occured')
-            self.logger(LogLevel.warning, traceback.format_exc())
+            self.logger.warning(f'During handling request, an {exception} has occured')
+            self.logger.warning(traceback.format_exc())
             self.reload(*self.dispatchers)
 
     def answer_request(self, client_socket, handle, request, http_data, http_header, http_content):
@@ -149,7 +152,7 @@ class Server:
                     handle = self.hcdp(response)
                     if handle is not None:
                         return self.answer_request(client_socket, handle, request, http_data, http_header, http_content)
-                    self.logger(LogLevel.error, f'Error code {response} `s handler is not defined')
+                    self.logger.error(f'Error code {response} `s handler is not defined')
                 elif response is not None:
                     client_socket.sendall(utils.optional(response.make, type=request.version, gzip=True))
                 client_socket.close()
