@@ -1,5 +1,6 @@
 from slinn.logger import Logger, LogLevel
 from slinn.address import Address
+from slinn.i_middleware import IMiddleware
 from slinn.filter import Filter
 from slinn.link_filter import LinkFilter
 from slinn.any_filter import AnyFilter
@@ -19,7 +20,7 @@ from slinn.dispatcher import Dispatcher
 from slinn import utils
 
 
-version = 'Slinn Nukeful v2.3.0 100524A'
+version = 'Slinn Nukeful v2.3.0 100524B'
 
 Response = HttpResponse
 Redirect = HttpRedirect

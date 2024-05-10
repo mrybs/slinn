@@ -2,9 +2,11 @@ from slinn.http_response import HttpResponse
 
 
 class HttpAPIResponse(HttpResponse):
+    
     """
     Like HttpResponse, but with header `Access-Control-Allow-Origin: *`
     """
+
     def __init__(self, payload: any, data: list[tuple] = None, status: str = '200 OK',
                  content_type: str = 'text/plain') -> None:
         self.payload = str(payload).encode() if type(payload) in [str, int, float, bool, dict] else bytes(payload)

@@ -5,9 +5,11 @@ from typing import IO
 
 
 class LogLevel(enum.Enum):
+
     """
     Types of log. If logger`s log level higher than message`s log level, nothing will be logged
     """
+
     info = 0
     warning = 1
     error = 2
@@ -15,9 +17,11 @@ class LogLevel(enum.Enum):
 
 
 class Logger:
+
     """
     Class for logging into stdout
     """
+    
     def __init__(self, min_log_level: LogLevel, out: IO = sys.stdout) -> None:
         self.min_log_level = min_log_level
         self.out = out

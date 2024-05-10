@@ -2,9 +2,11 @@ import socket
 
 
 class Address:
+
     """
     IPv4/IPv6 with DNS address structure
     """
+    
     def __init__(self, port: int, host: str = None) -> None:
         self.port = port
         if host not in [None, '']:

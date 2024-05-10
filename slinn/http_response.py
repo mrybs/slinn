@@ -2,16 +2,17 @@ import slinn, gzip
 
 
 class HttpResponse:
+    
     """
     Base class for all responses
     """
+
     def __init__(self, payload: any, data: list[tuple] = None, status: str = '200 OK',
                  content_type: str = 'text/plain') -> None:
         self.payload = payload
         self.data = data if data is not None else [('Content-Type', content_type), ('Server', slinn.version)] \
                                                   + [('Content-Length', len(self.payload))]
         self.status = status
-        self.gzip = gzip
 
     def set_cookie(self, key: str, value: any, attributes: dict = None) -> None:
         if attributes is None:

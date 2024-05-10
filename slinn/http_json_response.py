@@ -3,9 +3,11 @@ import json
 
 
 class HttpJSONResponse(HttpResponse):
+    
     """
     HttpResponse-based class, that uses keyword arguments to response JSON object
     """
+    
     def __init__(self, **payload: dict | list[dict]) -> None:
         self.data = payload['__data'] if '__data' in payload.keys() else None
         self.status = payload['__status'] if '__status' in payload.keys() else '200 OK'

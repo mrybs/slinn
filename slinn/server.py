@@ -8,9 +8,11 @@ RESET = '\u001b[0m'
 
 
 class Server:
+    
     """
     Main class to start server
     """
+
     class Handle:
         def __init__(self, filter: Filter, function):
             self.filter = filter
@@ -18,7 +20,7 @@ class Server:
 
     def __init__(self, *dispatchers: tuple[Dispatcher, ...], smart_navigation: bool = True, ssl_fullchain: str = None, # type: ignore
                  ssl_key: str = None, timeout: float = 0.03, max_bytes_per_recieve: int = 4096,
-                 max_bytes: int = 4294967296, _func=lambda server: None, logger: Logger = Logger(LogLevel.warning),
+                 max_bytes: int = 4294967296, _func=lambda server: None, logger: Logger = Logger(LogLevel.info),
                  ecdp: HCDispatcher = HCDispatcher()) -> None:
         self.dispatchers = dispatchers
         self.smart_navigation = smart_navigation
@@ -131,7 +133,7 @@ class Server:
                                 return
         except Exception as exception:
             self.logger(LogLevel.warning, f'During handling request, an {exception} has occured')
-            self.logger(LogLevel.warning, traceback.extract_stack())
+            self.logger(LogLevel.warning, traceback.format_exc())
             self.reload(*self.dispatchers)
 
     def answer_request(self, client_socket, handle, request, http_data, http_header, http_content):
@@ -144,9 +146,7 @@ class Server:
                                           http_content=http_content,
                                           client_socket=client_socket)
                 if type(response) is int:
-                    if response < 99 or response > 599:
-                        raise ValueError(f'Error code {response} does not exist')
-                    handle = self.ecdp(response)
+                    handle = self.hcdp(response)
                     if handle is not None:
                         return self.answer_request(client_socket, handle, request, http_data, http_header, http_content)
                     self.logger(LogLevel.error, f'Error code {response} `s handler is not defined')

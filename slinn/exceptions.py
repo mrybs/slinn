@@ -1,0 +1,1 @@
+class HandlerNotFoundException(LookupError): pass

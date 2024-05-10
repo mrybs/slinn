@@ -2,9 +2,11 @@ from slinn.http_response import HttpResponse
 
 
 class HttpRender(HttpResponse):
+    
     """
     Renders any file to HttpResponse-based object
     """
+
     def __init__(self, file_path: str, data: list[tuple] = None, status: str = '200 OK') -> None:
         self.file_path = file_path
         self.file_extension = file_path.split('.')[-1]
