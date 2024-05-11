@@ -21,6 +21,7 @@ if __name__ == '__main__':
             else:
                 print(f'{BLUE}{apppath} has already existed{RESET}')
             shutil.copyfile(modulepath + 'default/manage.py', f'{apppath}/manage.py')
+            shutil.copyfile(modulepath + 'default/htrf.py', f'{apppath}/htrf.py')
             shutil.copyfile(modulepath + 'default/project.json', f'{apppath}/project.json')
             venv.create(f'{apppath}/venv')
             packages_dir = ''
@@ -38,22 +39,15 @@ if __name__ == '__main__':
                 print(f'{RED}Cannot install slinn to the new virtual environment{RESET}')
                 exit()
             try:
-                import pip
-
-                shutil.copytree(os.path.abspath(pip.__file__).replace('__init__.py', ''), packages_dir + '/pip')
+                shutil.copytree(os.path.abspath(__import__('pip').__file__).replace('__init__.py', ''), packages_dir + '/pip')
             except FileNotFoundError:
                 print(f'{BLUE}pip was not installed{RESET}')
             try:
-                import wheel
-
-                shutil.copytree((os.path.abspath(wheel.__file__).replace('__init__.py', '')).decode(), packages_dir + '/wheel')
+                shutil.copytree((os.path.abspath(__import__('wheel').__file__).replace('__init__.py', '')).decode(), packages_dir + '/wheel')
             except Exception:
                 print(f'{BLUE}wheel was not installed{RESET}')
             try:
-                import setuptools
-
-                shutil.copytree(os.path.abspath(setuptools.__file__).replace('__init__.py', ''),
-                                packages_dir + '/setuptools')
+                shutil.copytree(os.path.abspath(__import__('setuptools').__file__).replace('__init__.py', ''), packages_dir + '/setuptools')
             except Exception:
                 print(f'{BLUE}setuptools was not installed{RESET}')
             print(f'{GREEN}Project has created{RESET}')

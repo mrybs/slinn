@@ -1,4 +1,5 @@
 from slinn.http_response import HttpResponse
+from slinn import utils, FTDispatcher
 
 
 class HttpRender(HttpResponse):
@@ -9,37 +10,23 @@ class HttpRender(HttpResponse):
 
     def __init__(self, file_path: str, data: list[tuple] = None, status: str = '200 OK') -> None:
         self.file_path = file_path
-        self.file_extension = file_path.split('.')[-1]
         self.data = data
         self.status = status
 
-    def make(self, version: str = 'HTTP/2.0', use_gzip: bool = True) -> bytes:
-        content_type = 'text/plain'
-        match self.file_extension:
-            case 'html':
-                with open(self.file_path, 'r') as f:
-                    self.payload = f.read()
-                    content_type = 'text/html'
-            case 'css':
-                with open(self.file_path, 'r') as f:
-                    self.payload = f.read()
-                    content_type = 'text/css'
-            case 'js':
-                with open(self.file_path, 'r') as f:
-                    self.payload = f.read()
-                    content_type = 'text/javascript'
-            case 'png':
-                with open(self.file_path, 'rb') as f:
-                    self.payload = f.read()
-                    content_type = 'image/png'
-            case 'jpg':
-                with open(self.file_path, 'rb') as f:
-                    self.payload = f.read()
-                    content_type = 'image/jpg'
-            case 'svg':
-                with open(self.file_path, 'rb') as f:
-                    self.payload = f.read()
-                    content_type = 'image/svg'
-        self.data = self.data if self.data is not None else [('Content-Type', content_type),
-                                                             ('Server', 'Slinn'), ('Content-Length', len(self.payload))]
-        return super().make(version, use_gzip)
+    def make(self, version: str = 'HTTP/2.0', use_gzip: bool = False, htrf: FTDispatcher = FTDispatcher()) -> bytes:
+        def size(_filter: str, text: str) -> int:
+            a = utils.min_restartswith_size(text, _filter) if utils.rematcheswith(text, _filter) else 2147483647
+            b = utils.Bmin_restartswith_size(text, _filter) if utils.rematcheswith(text, _filter) else 2147483647
+            if not utils.rematcheswith(text, _filter):
+                return -1
+            elif a == 2147483647:
+                return 0
+            else:
+                return b
+        if htrf.handles == []:
+            with open(self.file_path, 'rb') as file:
+                return HttpResponse(file.read()).make(use_gzip=use_gzip)
+        sizes = [size(handle.filter, self.file_path) for handle in htrf.handles]
+        handle = htrf.handles[sizes.index(max(sizes))]
+        with open(self.file_path, 'rb') as file:
+            return utils.optional(utils.optional(handle.function, file=file).make, version=version, use_gzip=use_gzip, htrf=htrf)

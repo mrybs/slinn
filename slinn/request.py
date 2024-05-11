@@ -1,5 +1,5 @@
 import urllib.parse
-from slinn import File
+from slinn import File, FTDispatcher, utils
 
 
 class Request:
@@ -45,7 +45,7 @@ class Request:
             files[-1].data += line + b'\r\n'
         return files[:-1]
 
-    def __init__(self, header: str, body: bytes, client_address: tuple[str, int], client_socket) -> None:
+    def __init__(self, header: str, body: bytes, client_address: tuple[str, int], client_socket, htrf: FTDispatcher = FTDispatcher()) -> None:
         def get_args(text):
             return {} if text == '' else {pair.split('=')[0]: '='.join(pair.split('=')[1:]) for pair in text.split('&')}
 
@@ -75,12 +75,17 @@ class Request:
         self.__str__ = self.__repr__
 
         self.client_socket = client_socket
+        self.htrf = htrf
 
     def __repr__(self) -> str:
         return f'[{self.method}] request {self.full_link} from {"" if "." in self.ip else "["}{self.ip}{"" if "." in self.ip else "]"}:{self.port} on {self.host}'
 
     def respond(self, response_class, *args, **kwargs) -> None:
-        self.client_socket.sendall(response_class(*args, **kwargs).make())
+        made = utils.optional(response_class(*args, **kwargs).make, version = self.version, htrf = self.htrf)
+        if made is None:
+            return
+        self.client_socket.sendall(made)
 
 # def set_cookie(self, response_class, *args, **kwargs):
 # 	self.client_socket.sendall(response_class(*args, **kwargs).make())
+# TODO: implement request.set_cookie

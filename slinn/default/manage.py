@@ -1,6 +1,10 @@
-import sys, os, shutil, json, base64
-from slinn import version as slinn_version
+import sys
+import os
+import shutil
+import json
+import base64
 import slinn
+
 
 RED = '\u001b[31m'
 GREEN = '\u001b[32m'
@@ -228,8 +232,23 @@ def reloader(server):
 			print('Smart navigation ' + ('enabled' if smart_navigation else 'disabled'))
 			print(RESET)
 
+			import logging
+			logging.basicConfig(filename=f'{name}.journal.log', level=logging.INFO)
+
 			print('Starting server...')
-			start = f"import logging;logging.basicConfig(filename='{name}.journal.log', level=logging.INFO);"+';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key}, timeout={timeout}, max_bytes_per_recieve={max_bytes_per_recieve}, max_bytes={max_bytes}, _func=reloader);server.listen(Address({port}, "{host}"))'
+			start = ';'.join(load_imports(apps, debug))+reloader+'\n'.join([line.strip() for line in f"""
+			from htrf import htrf
+			server=Server(
+				{",".join(dps)}, 
+				smart_navigation = {smart_navigation},
+				ssl_fullchain = {ssl_fullchain},
+				ssl_key = {ssl_key},
+				timeout = {timeout},
+				max_bytes_per_recieve = {max_bytes_per_recieve},
+				max_bytes = {max_bytes}, _func=reloader,
+				htrf = htrf)
+			server.listen(Address({port}, "{host}"))
+			""".split('\n')])
 			exec(start)
 		elif sys.argv[1].lower() == 'create':
 			args = get_args(['name', 'host'], ' '.join(sys.argv[2:]))
@@ -250,7 +269,7 @@ else:
 """.replace('%appname%', ensure_appname)
 				f.write(data)
 			with open(f'{ensure_appname}/app.py', 'w') as f:
-				data = """from slinn import Dispatcher, Filter, HttpResponse
+				data = """from slinn import Dispatcher, LinkFilter, AnyFilter, Response, Render
  
 dp = Dispatcher(%hosts%)
 
@@ -312,7 +331,7 @@ Commands%RESET%:
 	%cmd% version                                                          %GRAY%# Prints version of Slinn%RESET%
 """.replace('%cmd%', f'py {sys.argv[0]}').replace('%GRAY%', GRAY).replace('%RESET%', RESET).replace('%BOLD%', BOLD))
 		elif sys.argv[1].lower() == 'version':
-			return print(slinn_version)
+			return print(slinn.version)
 		elif sys.argv[1].lower() == 'template':
 			args = get_args(['name', 'path'], ' '.join(sys.argv[2:]))
 			apppath = (args['path']+'?').replace('/?', '').replace('?', '') if 'path' in args.keys() else '.'

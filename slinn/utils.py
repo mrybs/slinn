@@ -15,7 +15,7 @@ class StoppableThread(threading.Thread):
 
 def optional(func, *args, **kwargs) -> any:
     _args, _kwargs, k = [], {}, {}
-    s = [arg.split(':')[0] for arg in ')'.join('('.join(str(inspect.signature(func)).split('(')[1:]).split(')')[:-1]).split(',')]
+    s = [arg.split(':')[0].strip() for arg in ')'.join('('.join(str(inspect.signature(func)).split('(')[1:]).split(')')[:-1]).split(',')]
     for key in kwargs.keys():
         if key in s:
             k[key] = kwargs[key]
