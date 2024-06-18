@@ -1,18 +1,21 @@
-from slinn import Dispatcher, LinkFilter, AnyFilter, HttpResponse
-import slinn
+from slinn import *
 
-def read(filename):
-    file = open(filename, 'r', encoding='utf-8')
-    data = file.read()
-    file.close()
+
+def read(filename) -> str:
+    _file = open(filename, 'r', encoding='utf-8')
+    data = _file.read()
+    _file.close()
     return data
- 
+
+
 dp = Dispatcher()
 
+
 @dp(LinkFilter('styles.css'))
-def styles(request):
-    return HttpResponse(read('templates_data/firstrun/styles.css'))
-                       
+def styles(request: Request) -> None:
+    request.respond(Render, 'templates_data/firstrun/styles.css')
+
+
 @dp(AnyFilter)
-def index(request):
-    return HttpResponse(read('templates_data/firstrun/slinn.html').replace('{% version %}', slinn.version.split()[2]), content_type='text/html')
+def index(request: Request) -> None:
+    request.respond(Response, read('templates_data/firstrun/slinn.html').replace('{% version %}', version.split()[2]), content_type='text/html')

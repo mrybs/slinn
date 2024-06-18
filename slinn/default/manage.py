@@ -1,6 +1,10 @@
-import sys, os, shutil, json, base64
-from slinn import version as slinn_version
+import sys
+import os
+import shutil
+import json
+import base64
 import slinn
+
 
 RED = '\u001b[31m'
 GREEN = '\u001b[32m'
@@ -105,9 +109,10 @@ def main():
 		if sys.argv[1].lower() == 'run':
 			from slinn import Server, Address
 
-			def config():
+			def config(default=None):
+				cfg = default or {}
 				file = open('project.json')
-				cfg = json.loads(file.read())
+				cfg.update(json.loads(file.read()))
 				file.close()
 				return cfg
 			
@@ -142,17 +147,32 @@ def main():
 				return f'global {app};{app} = importlib.reload({app});'
 			
 			print('Loading config...')
-			cfg = config()
-			debug = cfg["debug"] if "debug" in cfg.keys() else False
-			apps = cfg['apps'] if 'apps' in cfg.keys() else []
-			port = cfg['port'] if 'port' in cfg.keys() else 8080
-			host = cfg['host'] if 'host' in cfg.keys() else ''
-			timeout = float(cfg['timeout']) if 'timeout' in cfg.keys() else 0.03
-			max_bytes_per_recieve = int(cfg['max_bytes_per_recieve']) if 'max_bytes_per_recieve' in cfg.keys() else 4096
-			max_bytes = int(cfg['max_bytes']) if 'max_bytes' in cfg.keys() else 4294967296
-			smart_navigation = cfg['smart_navigation'] if 'smart_navigation' in cfg.keys() else True
+			cfg = config(default={
+				'name': 'slinn',
+				'debug': False,
+				'apps': [],
+				'port': 8080,
+				'host': 'localhost',
+				'timeout': 0.03,
+				'max_bytes_per_recieve': 4096,
+				'max_bytes': 4294967296,
+				'smart_navigation': True,
+				'ssl': {
+					'fullchain': None,
+					'key': None
+				}
+			})
+			name = cfg["name"]
+			debug = cfg["debug"]
+			apps = cfg['apps']
+			port = cfg['port']
+			host = cfg['host']
+			timeout = float(cfg['timeout'])
+			max_bytes_per_recieve = int(cfg['max_bytes_per_recieve'])
+			max_bytes = int(cfg['max_bytes'])
+			smart_navigation = cfg['smart_navigation']
 			ssl_fullchain, ssl_key = None, None
-			if 'ssl' in cfg.keys() and 'fullchain' in cfg['ssl'].keys() and 'key' in cfg['ssl'].keys():
+			if 'fullchain' in cfg['ssl'].keys() and 'key' in cfg['ssl'].keys():
 				ssl_fullchain = '"'+cfg['ssl']['fullchain']+'"' if cfg['ssl']['fullchain'] else None    
 				ssl_key = '"'+cfg['ssl']['key']+'"' if cfg['ssl']['key'] else None
 			dps = get_dispatchers(apps, debug)
@@ -212,8 +232,23 @@ def reloader(server):
 			print('Smart navigation ' + ('enabled' if smart_navigation else 'disabled'))
 			print(RESET)
 
+			import logging
+			logging.basicConfig(filename=f'{name}.journal.log', level=logging.INFO)
+
 			print('Starting server...')
-			start = ';'.join(load_imports(apps, debug))+reloader+f'server=Server({",".join(dps)}, smart_navigation={smart_navigation}, ssl_fullchain={ssl_fullchain}, ssl_key={ssl_key}, timeout={timeout}, max_bytes_per_recieve={max_bytes_per_recieve}, max_bytes={max_bytes}, _func=reloader);server.listen(Address({port}, "{host}"))'
+			start = ';'.join(load_imports(apps, debug))+reloader+'\n'.join([line.strip() for line in f"""
+			from htrf import htrf
+			server=Server(
+				{",".join(dps)}, 
+				smart_navigation = {smart_navigation},
+				ssl_fullchain = {ssl_fullchain},
+				ssl_key = {ssl_key},
+				timeout = {timeout},
+				max_bytes_per_recieve = {max_bytes_per_recieve},
+				max_bytes = {max_bytes}, _func=reloader,
+				htrf = htrf)
+			server.listen(Address({port}, "{host}"))
+			""".split('\n')])
 			exec(start)
 		elif sys.argv[1].lower() == 'create':
 			args = get_args(['name', 'host'], ' '.join(sys.argv[2:]))
@@ -234,7 +269,7 @@ else:
 """.replace('%appname%', ensure_appname)
 				f.write(data)
 			with open(f'{ensure_appname}/app.py', 'w') as f:
-				data = """from slinn import Dispatcher, Filter, HttpResponse
+				data = """from slinn import Dispatcher, LinkFilter, AnyFilter, Response, Render
  
 dp = Dispatcher(%hosts%)
 
@@ -296,7 +331,7 @@ Commands%RESET%:
 	%cmd% version                                                          %GRAY%# Prints version of Slinn%RESET%
 """.replace('%cmd%', f'py {sys.argv[0]}').replace('%GRAY%', GRAY).replace('%RESET%', RESET).replace('%BOLD%', BOLD))
 		elif sys.argv[1].lower() == 'version':
-			return print(slinn_version)
+			return print(slinn.version)
 		elif sys.argv[1].lower() == 'template':
 			args = get_args(['name', 'path'], ' '.join(sys.argv[2:]))
 			apppath = (args['path']+'?').replace('/?', '').replace('?', '') if 'path' in args.keys() else '.'

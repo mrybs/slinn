@@ -1,4 +1,6 @@
 {
+    "name": "slinn",
+
     "host": "localhost",
     "port": 8080,
     
