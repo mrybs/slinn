@@ -21,7 +21,7 @@ from slinn.http_json_api_response import HttpJSONAPIResponse
 from slinn import utils
 
 
-version = 'Slinn Nukeful v2.3.0 110524B'
+version = 'Slinn Nukeful v2.3.0 180624B'
 
 Response = HttpResponse
 Redirect = HttpRedirect
