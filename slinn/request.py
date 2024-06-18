@@ -40,7 +40,13 @@ class Request:
 					binary = 0
 					continue
 			files[-1].data += line + b'\r\n'
-		return files[:-1]
+		return {
+			'payload': b'',
+			'files': files[:-1]
+		} if len(files[:-1]) != 0 else {
+			'payload': http_body,
+			'files': list()
+		}
 
 	def __init__(self, header: str, body: bytes, client_address: tuple[str, int]):
 		def get_args(text):
@@ -49,7 +55,8 @@ class Request:
 		self.type = header.split('\r\n')[0].strip().split(' ')
 		self.header = {'method': self.type[0], 'link': ' '.join(self.type[1:-1]), 'ver': self.type[-1], 'data': {'user-agent': '', 'Accept': '', 'Accept-Encoding': '', 'Accept-Language': ''}}
 		header = self.parse_http_header(header)
-		self.files = self.parse_http_body(body)
+		self.payload = self.parse_http_body(body)['payload']
+		self.files = self.parse_http_body(body)['files']
 		self.header['data'].update(header)
 		self.ip, self.port = client_address[:2]
 		self.method = self.header['method']
