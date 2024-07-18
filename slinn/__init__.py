@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime
 from slinn.address import Address
 from slinn.handle import Handle
 from slinn.i_middleware import IMiddleware
@@ -25,10 +26,11 @@ from slinn import utils
 VERSION = {
     'name': 'Slinn',
     'codename': 'Nukeful',
-    'version': '2.3.0',
-    'version_id': '190724A'
+    'version': '2.3.1',
+    'version_id': '190724B',
+    'dies_at': datetime(2024, 8, 19, 23, 59)
 }
-version = '{} {} v{} {}'.format(*VERSION.values())
+version = '{} {} v{} {}'.format(*list(VERSION.values())[:-1])
 
 Response = HttpResponse
 Redirect = HttpRedirect
@@ -45,3 +47,6 @@ HttpRender = utils.make_deprecated(HttpRender, 'Render')
 HttpAPIResponse = utils.make_deprecated(HttpAPIResponse, 'APIResponse')
 HttpJSONResponse = utils.make_deprecated(HttpJSONResponse, 'JSONResponse')
 HttpJSONAPIResponse = utils.make_deprecated(HttpJSONAPIResponse, 'JSONAPIResponse')
+
+if datetime.now() > VERSION['dies_at']:
+    exit("Slinn`s version has expired. You need to upgrade")
