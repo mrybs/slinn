@@ -21,7 +21,7 @@ class Server:
     def __init__(self, *dispatchers: tuple[Dispatcher, ...], smart_navigation: bool = True, ssl_fullchain: str = None, # type: ignore
                  ssl_key: str = None, timeout: float = 0.03, max_bytes_per_recieve: int = 4096,
                  max_bytes: int = 4294967296, _func=lambda server: None, logger: logging.Logger = logging.getLogger(),
-                 ecdp: HCDispatcher = HCDispatcher(), htrf: FTDispatcher = FTDispatcher()) -> None: # type: ignore
+                 hcdp: HCDispatcher = HCDispatcher(), htrf: FTDispatcher = FTDispatcher()) -> None: # type: ignore
         self.dispatchers = dispatchers
         self.smart_navigation = smart_navigation
         self.server_socket = None
@@ -34,7 +34,7 @@ class Server:
         self.max_bytes = max_bytes
         self._func = _func
         self.logger = logger
-        self.ecdp = ecdp
+        self.hcdp = hcdp
         self.htrf = htrf
 
     def reload(self, *dispatchers: tuple) -> None:
@@ -152,7 +152,7 @@ class Server:
                         return self.answer_request(client_socket, handle, request, http_data, http_header, http_content)
                     self.logger.error(f'Error code {response} `s handler is not defined')
                 elif response is not None:
-                    client_socket.sendall(utils.optional(response.make, type=request.version, gzip=True, htrf=self.htrf))
+                    client_socket.sendall(utils.optional(response.make, version=request.version, type=request.version, gzip=True, htrf=self.htrf))
                 client_socket.close()
             return True
         return False

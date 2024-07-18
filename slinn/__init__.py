@@ -1,3 +1,4 @@
+import sys
 from slinn.address import Address
 from slinn.handle import Handle
 from slinn.i_middleware import IMiddleware
@@ -21,7 +22,13 @@ from slinn.http_json_api_response import HttpJSONAPIResponse
 from slinn import utils
 
 
-version = 'Slinn Nukeful v2.3.0 180624B'
+VERSION = {
+    'name': 'Slinn',
+    'codename': 'Nukeful',
+    'version': '2.3.0',
+    'version_id': '190724A'
+}
+version = '{} {} v{} {}'.format(*VERSION.values())
 
 Response = HttpResponse
 Redirect = HttpRedirect
@@ -30,3 +37,11 @@ Render = HttpRender
 APIResponse = HttpAPIResponse
 JSONResponse = HttpJSONResponse
 JSONAPIResponse = HttpJSONAPIResponse
+
+HttpResponse = utils.make_deprecated(HttpResponse, 'Response')
+HttpRedirect = utils.make_deprecated(HttpRedirect, 'Redirect')
+EmptyHttpResponse = utils.make_deprecated(EmptyHttpResponse, 'EmptyResponse')
+HttpRender = utils.make_deprecated(HttpRender, 'Render')
+HttpAPIResponse = utils.make_deprecated(HttpAPIResponse, 'APIResponse')
+HttpJSONResponse = utils.make_deprecated(HttpJSONResponse, 'JSONResponse')
+HttpJSONAPIResponse = utils.make_deprecated(HttpJSONAPIResponse, 'JSONAPIResponse')

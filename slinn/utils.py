@@ -1,4 +1,9 @@
-import re, threading, socket, inspect, json
+import warnings
+import inspect
+import json
+import re
+import socket
+import threading
 
 
 class StoppableThread(threading.Thread):
@@ -28,6 +33,13 @@ def optional(func, *args, **kwargs) -> any:
     else:
         _args, _kwargs = args, kwargs
     return func(*_args, **_kwargs)
+
+def make_deprecated(obj, what_instead):
+    class Wrapper(obj):
+        def __init__(self, *args, **kwargs):
+            warnings.warn(f"Using {obj.__name__} is deprecated. Instead of use {what_instead}", DeprecationWarning, stacklevel=256)
+            super().__init__(*args, **kwargs)
+    return Wrapper
 
 
 def restartswith(text: str, reg: str) -> bool:

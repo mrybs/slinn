@@ -1,15 +1,15 @@
-import slinn, gzip
+import gzip
+import slinn
 
 
-class HttpResponse:
-    
+class HttpResponse():
     """
     Base class for all responses
     """
 
     def __init__(self, payload: any, data: list[tuple] = None, status: str = '200 OK',
                  content_type: str = 'text/plain') -> None:
-        self.payload = payload
+        self.payload = slinn.utils.representate(payload).encode()
         self.data = data if data is not None else [('Content-Type', content_type), ('Server', slinn.version)] \
                                                   + [('Content-Length', len(self.payload))]
         self.status = status
@@ -23,8 +23,7 @@ class HttpResponse:
                               attributes.keys()]))
 
     def make(self, version: str = 'HTTP/2.0', use_gzip: bool = True) -> bytes:
-        payload = slinn.utils.representate(self.payload).encode()
         return (f'{version} {self.status}' + '\r\n'
                 + "\r\n".join([str(dat[0]) + ": " + str(dat[1]) for dat in self.data
                                + ([('Content-Encoding', 'gzip')] if use_gzip else [])]) + '\r\n\r\n').encode() \
-            + (gzip.compress(payload) if use_gzip else payload)
+            + (gzip.compress(self.payload) if use_gzip else self.payload)
