@@ -108,16 +108,16 @@ class Server:
                 if True in [utils.restartswith(request.host, host) for host in dispatcher.hosts]:
                     if self.smart_navigation:
                         sizes = [handle.filter.size(request.link, request.method) for handle in dispatcher.handles]
-                        if sizes != []:
+                        if sizes:
                             handle = dispatcher.handles[sizes.index(max(sizes))]
                             if handle.filter.check(request.link, request.method):
                                 if utils.check_socket(client_socket):
                                     data = handle.function(request).make(request.version)
-                                    packages = [data[x:x+self.max_bytes_per_recieve] for x in range (0, len(data), self.max_bytes_per_recieve)]
+                                    packages = [data[x:x+self.max_bytes_per_package] for x in range (0, len(data), self.max_bytes_per_package)]
                                     i = 0
                                     while i < len(packages):
                                         try:
-                                            client_socket.sendall()
+                                            client_socket.sendall(packages[i])
                                             i += 1
                                         except TimeoutError:
                                             continue
@@ -128,8 +128,15 @@ class Server:
                             if handle.filter.check(request.link, request.method):
                                 if utils.check_socket(client_socket):
                                     data = handle.function(request).make(request.version)
-                                    packages = [data[x:x+self.max_bytes_per_recieve] for x in range (0, len(data), self.max_bytes_per_recieve)]
-                                    client_socket.sendall()
+                                    packages = [data[x:x + self.max_bytes_per_package] for x in
+                                                range(0, len(data), self.max_bytes_per_package)]
+                                    i = 0
+                                    while i < len(packages):
+                                        try:
+                                            client_socket.sendall(packages[i])
+                                            i += 1
+                                        except TimeoutError:
+                                            continue
                                     client_socket.close()
                                 return
         except ssl.SSLError:

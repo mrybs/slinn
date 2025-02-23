@@ -7,3 +7,4 @@ dist/
 localhost.crt
 localhost.key
 t/
+.idea/
