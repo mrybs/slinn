@@ -11,6 +11,7 @@
 ![GitHub watchers](https://img.shields.io/github/watchers/mrybs/slinn)
 ![GitHub forks](https://img.shields.io/github/forks/mrybs/slinn)
 
+![GitHub commit activity](https://img.shields.io/github/commits-since/mrybs/slinn/latest)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/mrybs/slinn)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/t/mrybs/slinn)
 
