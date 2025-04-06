@@ -7,10 +7,5 @@ dist/
 localhost.crt
 localhost.key
 t/
-<<<<<<< Updated upstream
-.venv
-.idea
-=======
 .venv/
 .idea/
->>>>>>> Stashed changes
