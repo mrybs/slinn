@@ -1,5 +1,5 @@
 {
-    "name": "slinn",
+    "name": "Slinn",
 
     "host": "localhost",
     "port": 8080,
@@ -13,6 +13,6 @@
     "apps": ["firstrun"],
 
     "smart_navigation": true,
-    "max_bytes_per_recieve": 4096,
+    "max_bytes_per_receive": 4096,
     "max_bytes": 4294967296
 }

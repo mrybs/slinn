@@ -1,12 +1,14 @@
 import venv
 from slinn.default import *
 
+
 RED = '\u001b[31m'
 GREEN = '\u001b[32m'
 BLUE = '\u001b[34m'
 RESET = '\u001b[0m'
 BOLD = '\u001b[1m'
 GRAY = '\u001b[38;2;127;127;127m'
+
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -95,7 +97,7 @@ Commands%RESET%:
 	%cmd% version                		%GRAY%# Prints version of Slinn%RESET%
 """.replace('%cmd%', f'py -m slinn').replace('%GRAY%', GRAY).replace('%RESET%', RESET).replace('%BOLD%', BOLD))
         elif sys.argv[1].lower() == 'version':
-            print(slinn_version)
+            print(slinn.version)
         else:
             print(f'{RED}Command {sys.argv[1].lower()} is not exists{RESET}')
     else:

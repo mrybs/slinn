@@ -75,8 +75,8 @@ class Request:
         self.link = self.full_link[:(self.full_link.index('?') if '?' in self.full_link else None)]
         self.args = get_args(
             self.full_link[(self.full_link.index('?') + 1 if '?' in self.full_link else len(self.full_link)):])
-        self.cookies = {c.split('=')[0]: c.split('=')[1] for c in
-                        self.header['data']['Cookie'].split(';')} if 'Cookie' in self.header['data'] else []
+        self.cookies = {c.split('=')[0].strip(): c.split('=')[1] for c in
+                        self.header['data']['Cookie'].split(';')} if 'Cookie' in self.header['data'] else dict()
 
         self.__str__ = self.__repr__
 

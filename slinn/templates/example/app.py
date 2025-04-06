@@ -1,7 +1,7 @@
-from slinn import *
+from slinn import Dispatcher, LinkFilter, AnyFilter, Request, JSONAPIResponse, Redirect, Response
+
 
 dp = Dispatcher()
-
 
 @dp(LinkFilter('api'))
 def api(request: Request) -> None:

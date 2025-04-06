@@ -6,3 +6,6 @@ dist/
 *.pyc
 localhost.crt
 localhost.key
+t/
+.venv
+.idea

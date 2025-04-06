@@ -17,5 +17,5 @@ setup(name='slinn',
       url='https://slinn.miotp.ru/',
       long_description=readme(),
       long_description_content_type='text/markdown',
-      python_requires='>=3.11',
+      python_requires='>=3.9',
       zip_safe=True)

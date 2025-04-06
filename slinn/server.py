@@ -1,5 +1,5 @@
 from __future__ import annotations
-from slinn import Request, Address, Filter, HCDispatcher, FTDispatcher, utils
+from slinn import Request, Address, Filter, HCDispatcher, FTDispatcher, HttpResponse, utils
 import socket
 import ssl
 import os
@@ -8,7 +8,6 @@ import traceback
 
 
 class Server:
-    
     """
     Main class to start server
     """
@@ -18,10 +17,11 @@ class Server:
             self.filter = filter
             self.function = function
 
-    def __init__(self, *dispatchers: tuple[Dispatcher, ...], smart_navigation: bool = True, ssl_fullchain: str = None, # type: ignore
-                 ssl_key: str = None, timeout: float = 0.03, max_bytes_per_recieve: int = 4096,
+    def __init__(self, *dispatchers: tuple[Dispatcher, ...], smart_navigation: bool = True, ssl_fullchain: str = None,
+                 # type: ignore
+                 ssl_key: str = None, timeout: float = 0.03, max_bytes_per_receive: int = 4096,
                  max_bytes: int = 4294967296, _func=lambda server: None, logger: logging.Logger = logging.getLogger(),
-                 hcdp: HCDispatcher = HCDispatcher(), htrf: FTDispatcher = FTDispatcher()) -> None: # type: ignore
+                 hcdp: HCDispatcher = HCDispatcher(), htrf: FTDispatcher = FTDispatcher()) -> None:  # type: ignore
         self.dispatchers = dispatchers
         self.smart_navigation = smart_navigation
         self.server_socket = None
@@ -30,7 +30,7 @@ class Server:
         self.ssl_context = None
         self.thread = None
         self.timeout = timeout
-        self.max_bytes_per_recieve = max_bytes_per_recieve
+        self.max_bytes_per_receive = max_bytes_per_receive
         self.max_bytes = max_bytes
         self._func = _func
         self.logger = logger
@@ -47,11 +47,11 @@ class Server:
         self.dispatchers = dispatchers
         self.logger.info('Server has reloaded')
 
-    def address(self, port: int, domain: str=None):
+    def address(self, port: int, domain: str = None):
         protocol = 'https' if self.ssl else 'http'
-        return (f'{protocol.upper()} server is available on {protocol}://'+
-               ('0.0.0.0' if (domain is None or domain == '') else ('['+domain+']' if ':' in domain else domain))+
-               f'{(":"+str(port) if port != 443 else "") if self.ssl else (":"+str(port )if port != 80 else "")}/')
+        return (f'{protocol.upper()} server is available on {protocol}://' +
+                ('0.0.0.0' if (domain is None or domain == '') else ('[' + domain + ']' if ':' in domain else domain)) +
+                f'{(":" + str(port) if port != 443 else "") if self.ssl else (":" + str(port) if port != 80 else "")}/')
 
     def listen(self, address: Address):
         self.server_socket = None
@@ -91,16 +91,19 @@ class Server:
         try:
             self._func(self)
             if self.ssl:
-                client_socket = self.ssl_context.wrap_socket(client_socket, server_side=True)
+                client_socket = self.ssl_context.wrap_socket(client_socket, server_side=True,
+                                                             do_handshake_on_connect=True, suppress_ragged_eofs=True)
             request: Request
             try:
                 client_socket.settimeout(self.timeout)
                 data = bytearray()
                 while len(data) < self.max_bytes:
                     try:
-                        b = client_socket.recv(self.max_bytes_per_recieve)
+                        b = client_socket.recv(self.max_bytes_per_receive)
                         data += b
                     except TimeoutError:
+                        break
+                    except socket.timeout:
                         break
 
                 data = data.split(b'\r\n\r\n')
@@ -109,7 +112,7 @@ class Server:
 
                 if header == '':
                     return
-                request = Request( header, content, client_address, client_socket)
+                request = Request(header, content, client_address, client_socket)
                 request.htrf = self.htrf
                 self.logger.info(repr(request))
             except KeyError:
@@ -118,13 +121,13 @@ class Server:
                 return self.logger.info('Got UnicodeDecodeError, probably invalid request. Ignore')
             except ConnectionResetError:
                 return self.logger.info('Connection reset by client')
-            except OSError:
+            except OSError as e:
                 return self.logger.info('Connection closed')
             for dispatcher in self.dispatchers:
                 if True in [utils.restartswith(request.host, host) for host in dispatcher.hosts]:
                     if self.smart_navigation:
                         sizes = [handle.filter.size(request.link, request.method) for handle in dispatcher.handles]
-                        if sizes != []:
+                        if sizes:
                             if self.answer_request(client_socket, dispatcher.handles[sizes.index(max(sizes))], request,
                                                    data, header, content):
                                 return
@@ -141,18 +144,28 @@ class Server:
         if handle.filter.check(request.link, request.method):
             if utils.check_socket(client_socket):
                 response = utils.optional(handle.function,
-                                          request = request,
-                                          http_data = http_data,
-                                          http_header = http_header,
-                                          http_content = http_content,
-                                          client_socket = client_socket)
+                                          request=request,
+                                          http_data=http_data,
+                                          http_header=http_header,
+                                          http_content=http_content,
+                                          client_socket=client_socket)
                 if type(response) is int:
                     handle = self.hcdp(response)
                     if handle is not None:
                         return self.answer_request(client_socket, handle, request, http_data, http_header, http_content)
                     self.logger.error(f'Error code {response} `s handler is not defined')
                 elif response is not None:
-                    client_socket.sendall(utils.optional(response.make, version=request.version, type=request.version, gzip=True, htrf=self.htrf))
+                    buffer = utils.optional(response.make, version=request.version, type=request.version, gzip=False,
+                                            htrf=self.htrf)
+                    packages = [buffer[x:x + self.max_bytes_per_receive] for x in
+                                range(0, len(buffer), self.max_bytes_per_receive)]
+                    i = 0
+                    while i < len(packages):
+                        try:
+                            client_socket.sendall(packages[i])
+                            i += 1
+                        except TimeoutError:
+                            continue
                 client_socket.close()
             return True
         return False

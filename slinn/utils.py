@@ -78,22 +78,22 @@ def min_restartswith_size(text: str, reg: str) -> int:
 def check_socket(sock) -> bool:
     return sock.getsockopt(socket.SOL_SOCKET, socket.SO_ERROR) == 0
 
-def representate(obj: any) -> str:
+def representate(obj: any) -> bytes:
     if type(obj) == dict:
-        return json.dumps({key:representate(obj[key]) for key in obj.keys()})
+        return json.dumps({key:representate(obj[key]).decode() for key in obj.keys()}, ensure_ascii=False).encode()
     if type(obj) in [list, tuple, set]:
-        return ', '.join([representate(elem) for elem in obj])
+        return b', '.join([representate(elem) for elem in obj])
     if type(obj) == str:
-        return obj
+        return obj.encode()
     if type(obj) == bytes:
-        return obj.decode()
+        return obj
     if type(obj) in [int, float]:
-        return str(obj)
+        return str(obj).encode()
     if type(obj) == bool:
-        return 'true' if obj else 'false'
+        return b'true' if obj else b'false'
     if type(obj).__str__ != object.__str__ or type(obj).__repr__ != object.__repr__:
-        try: return str(obj)
+        try: return str(obj).encode()
         except Exception: pass
-    try: return json.dumps({key:representate(obj.__dict__[key]) for key in obj.__dict__.keys()})
+    try: return json.dumps({key:representate(obj.__dict__[key]).decode() for key in obj.__dict__.keys()}, ensure_ascii=False).encode()
     except Exception as e: print(e)
     return f'<{type(obj)} object at {id(obj)}>'
