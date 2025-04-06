@@ -16,8 +16,6 @@ GRAY = '\u001b[38;2;127;127;127m'
 
 
 def arg_parse(arg: str):
-					current_quote = ''
-				if char in delimeters:
     return base64.urlsafe_b64decode(arg.removeprefix('b64@').encode() + b'==').decode() if arg.startswith(
         'b64@') else arg
 
@@ -44,18 +42,11 @@ def splits(string: str, delimiters=(' ', '\n'), quotes=tuple()):
 
 
 def get_args(expecting, text):
-	text = text.strip()
-	if text == '':
-		return {}
-	args = {'not_used': []}
-	Ds = ['\n', ' ']
-	Qs = ['"', "'", '`']
-		try:
-
     text = text.strip()
     if text == '':
         return {}
     args = {'not_used': []}
+    Ds = ['\n', ' ']
     Qs = ['"', "'", '`']
     spls = splits(text, Ds, Qs)
     i = 0
@@ -64,6 +55,7 @@ def get_args(expecting, text):
         try:
             if arg.strip().endswith('='):
                 W = arg.strip().removesuffix('=').strip()
+                expecting.pop(expecting.index(W))
                 args[W] = arg_parse(str(splits[i + 1]))
                 i += 2
                 continue
