@@ -1,0 +1,3 @@
+# slinn.HttpJSONAPIResponse
+
+Start typing here...

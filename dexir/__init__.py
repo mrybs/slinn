@@ -1,1 +1,1 @@
-from dexir import lexer
+from dexir import dexir

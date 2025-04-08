@@ -27,7 +27,7 @@ VERSION = {
     'name': 'Slinn',
     'codename': 'Nukeful',
     'version': '2.3.1',
-    'version_id': '060425B',
+    'version_id': '080425A',
     'dies_at': datetime(2025, 6, 6, 23, 59)
 }
 version = '{} {} v{} {}'.format(*list(VERSION.values())[:-1])
