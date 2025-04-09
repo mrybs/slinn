@@ -1,5 +1,6 @@
 import enum
 import tokenizer
+import lexer
 
 
 class Lexer:
@@ -44,7 +45,11 @@ class Lexeme:
             tokens = []
             while token := t.peek():
                 tokens.append(token)
-            return tokens
+            l = lexer.Lexer(tokens)
+            lexemes = []
+            while lexeme := l.peek():
+                lexemes.append(lexeme)
+            return lexemes
 
 
 class Token:
