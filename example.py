@@ -1,19 +1,19 @@
-from slinn import AsyncServer, Dispatcher, AnyFilter, Response, Address, LinkFilter, ResponseHeader, ResponseChunk, Server
+from slinn import AsyncServer, AnyFilter, Response, Address, LinkFilter, ResponseHeader, ResponseChunk, ApiDispatcher
 import logging
 import os
 import asyncio
 
 
 logging.basicConfig(level=logging.INFO)
-dp = Dispatcher()
+dp = ApiDispatcher()
 
 
-@dp(AnyFilter)
+@dp.get()
 async def index(request):
     await request.respond(Response, 'Hello, world')
 
 
-@dp(LinkFilter('/gpsl'))
+@dp.get('gpsl')
 async def gpsl(request):
     await request.respond(ResponseHeader, [('Content-Length', os.path.getsize(r'C:\Users\mrybs\Downloads\ГПсЛ.zip'))])
 
