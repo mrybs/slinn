@@ -15,8 +15,6 @@
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/mrybs/slinn)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/t/mrybs/slinn)
 
-![GitHub repo size](https://img.shields.io/github/repo-size/mrybs/slinn)
-
 
 ### Simple example
 ```python
