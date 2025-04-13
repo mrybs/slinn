@@ -1,5 +1,5 @@
 from __future__ import annotations
-from slinn import Request, Address, Filter, HCDispatcher, FTDispatcher, HttpResponse, utils
+from slinn import Request, Address, Filter, HCDispatcher, FTDispatcher, utils
 import socket
 import ssl
 import os

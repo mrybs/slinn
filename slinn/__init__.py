@@ -12,7 +12,10 @@ from slinn.dispatcher import Dispatcher
 from slinn.hcdispatcher import HCDispatcher
 from slinn.ftdispatcher import FTDispatcher
 from slinn.request import Request
+from slinn.async_request import AsyncRequest
 from slinn.http_response import HttpResponse
+from slinn.http_response_header import HttpResponseHeader
+from slinn.http_response_chunk import HttpResponseChunk
 from slinn.http_redirect import HttpRedirect
 from slinn.empty_http_response import EmptyHttpResponse
 from slinn.http_render import HttpRender
@@ -20,6 +23,7 @@ from slinn.http_api_response import HttpAPIResponse
 from slinn.http_json_response import HttpJSONResponse
 from slinn.http_json_api_response import HttpJSONAPIResponse
 from slinn.server import Server
+from slinn.async_server import AsyncServer
 from slinn import utils
 
 
@@ -27,12 +31,14 @@ VERSION = {
     'name': 'Slinn',
     'codename': 'Nukeful',
     'version': '2.3.1',
-    'version_id': '090425A',
-    'dies_at': datetime(2025, 6, 9, 23, 59)
+    'version_id': '130425A',
+    'dies_at': datetime(2025, 6, 13, 23, 59)
 }
 version = '{} {} v{} {}'.format(*list(VERSION.values())[:-1])
 
 Response = HttpResponse
+ResponseHeader = HttpResponseHeader
+ResponseChunk = HttpResponseChunk
 Redirect = HttpRedirect
 EmptyResponse = EmptyHttpResponse
 Render = HttpRender

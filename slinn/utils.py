@@ -34,6 +34,7 @@ def optional(func, *args, **kwargs) -> any:
         _args, _kwargs = args, kwargs
     return func(*_args, **_kwargs)
 
+
 def make_deprecated(obj, what_instead):
     class Wrapper(obj):
         def __init__(self, *args, **kwargs):

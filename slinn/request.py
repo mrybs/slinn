@@ -50,7 +50,7 @@ class Request:
         'files': []
       }
 
-    def __init__(self, header: str, body: bytes, client_address: tuple[str, int], client_socket, htrf: FTDispatcher = FTDispatcher()) -> None:
+    def __init__(self, header: str, body: bytes, client_address: tuple[str, int], connection, htrf: FTDispatcher = FTDispatcher()) -> None:
         def get_args(text):
             return {} if text == '' else {pair.split('=')[0]: '='.join(pair.split('=')[1:]) for pair in text.split('&')}
 
@@ -80,7 +80,7 @@ class Request:
 
         self.__str__ = self.__repr__
 
-        self.client_socket = client_socket
+        self.connection = connection
         self.htrf = htrf
 
     def __repr__(self) -> str:
@@ -90,7 +90,7 @@ class Request:
         made = utils.optional(response_class(*args, **kwargs).make, version = self.version, htrf = self.htrf)
         if made is None:
             return
-        self.client_socket.sendall(made)
+        self.connection.sendall(made)
 
 # def set_cookie(self, response_class, *args, **kwargs):
 # 	self.client_socket.sendall(response_class(*args, **kwargs).make())
