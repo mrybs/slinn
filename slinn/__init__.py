@@ -1,4 +1,5 @@
 import sys
+import warnings
 from datetime import datetime
 from slinn.address import Address
 from slinn.handle import Handle
@@ -34,7 +35,7 @@ VERSION = {
     'name': 'Slinn',
     'codename': 'Nukeful',
     'version': '2.3.1',
-    'version_id': '170425D',
+    'version_id': '170425E',
     'dies_at': datetime(2025, 6, 17, 23, 59)
 }
 version = '{} {} v{} {}'.format(*list(VERSION.values())[:-1])
