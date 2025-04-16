@@ -37,8 +37,12 @@ def optional(func, *args, **kwargs) -> any:
 
 def make_deprecated(obj, what_instead):
     class Wrapper(obj):
+        __is_deprecation_warned = False
+        
         def __init__(self, *args, **kwargs):
-            warnings.warn(f"Using {obj.__name__} is deprecated. Instead of use {what_instead}", DeprecationWarning, stacklevel=256)
+            if not Wrapper.__is_deprecation_warned:
+                warnings.warn(f"Using {obj.__name__} is deprecated. Instead of use {what_instead.__name__}", DeprecationWarning, stacklevel=256)
+            Wrapper.__is_deprecation_warned = True
             super().__init__(*args, **kwargs)
     return Wrapper
 

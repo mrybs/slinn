@@ -13,6 +13,9 @@ GRAY = '\u001b[38;2;127;127;127m'
 
 
 if __name__ == '__main__':
+    main()
+
+def main():
     if len(sys.argv) > 1:
         if sys.argv[1].lower() == 'create':
             args = get_args(['path'], ' '.join(sys.argv[2:]))

@@ -21,6 +21,6 @@ setup(name='slinn',
       zip_safe=True,
       entry_points={
             'console_scripts': [
-                  'slinn = __main__'
+                  'slinn = __main__:main'
             ],
       })

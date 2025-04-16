@@ -32,7 +32,7 @@ VERSION = {
     'name': 'Slinn',
     'codename': 'Nukeful',
     'version': '2.3.1',
-    'version_id': '170425A',
+    'version_id': '170425B',
     'dies_at': datetime(2025, 6, 17, 23, 59)
 }
 version = '{} {} v{} {}'.format(*list(VERSION.values())[:-1])
@@ -54,6 +54,8 @@ HttpRender = utils.make_deprecated(HttpRender, 'Render')
 HttpAPIResponse = utils.make_deprecated(HttpAPIResponse, 'APIResponse')
 HttpJSONResponse = utils.make_deprecated(HttpJSONResponse, 'JSONResponse')
 HttpJSONAPIResponse = utils.make_deprecated(HttpJSONAPIResponse, 'JSONAPIResponse')
+
+warnings.simplefilter('always', DeprecationWarning)
 
 if datetime.now() > VERSION['dies_at']:
     exit("Slinn`s version has expired. You need to upgrade")
