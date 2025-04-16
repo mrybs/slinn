@@ -34,7 +34,7 @@ VERSION = {
     'name': 'Slinn',
     'codename': 'Nukeful',
     'version': '2.3.1',
-    'version_id': '170425C',
+    'version_id': '170425D',
     'dies_at': datetime(2025, 6, 17, 23, 59)
 }
 version = '{} {} v{} {}'.format(*list(VERSION.values())[:-1])
@@ -49,13 +49,13 @@ APIResponse = HttpAPIResponse
 JSONResponse = HttpJSONResponse
 JSONAPIResponse = HttpJSONAPIResponse
 
-HttpResponse = utils.make_deprecated(HttpResponse, 'Response')
-HttpRedirect = utils.make_deprecated(HttpRedirect, 'Redirect')
-EmptyHttpResponse = utils.make_deprecated(EmptyHttpResponse, 'EmptyResponse')
-HttpRender = utils.make_deprecated(HttpRender, 'Render')
-HttpAPIResponse = utils.make_deprecated(HttpAPIResponse, 'APIResponse')
-HttpJSONResponse = utils.make_deprecated(HttpJSONResponse, 'JSONResponse')
-HttpJSONAPIResponse = utils.make_deprecated(HttpJSONAPIResponse, 'JSONAPIResponse')
+HttpResponse = utils.make_deprecated(HttpResponse, Response)
+HttpRedirect = utils.make_deprecated(HttpRedirect, Redirect)
+EmptyHttpResponse = utils.make_deprecated(EmptyHttpResponse, EmptyResponse)
+HttpRender = utils.make_deprecated(HttpRender, Render)
+HttpAPIResponse = utils.make_deprecated(HttpAPIResponse, APIResponse)
+HttpJSONResponse = utils.make_deprecated(HttpJSONResponse, JSONResponse)
+HttpJSONAPIResponse = utils.make_deprecated(HttpJSONAPIResponse, JSONAPIResponse)
 
 warnings.simplefilter('always', DeprecationWarning)
 
