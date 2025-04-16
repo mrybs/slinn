@@ -18,4 +18,9 @@ setup(name='slinn',
       long_description=readme(),
       long_description_content_type='text/markdown',
       python_requires='>=3.9',
-      zip_safe=True)
+      zip_safe=True,
+      entry_points={
+            'console_scripts': [
+                  'slinn = __main__'
+            ],
+      })

@@ -1,4 +1,6 @@
 import venv
+import sys
+import subprocess
 from slinn.default import *
 
 
@@ -99,6 +101,7 @@ Commands%RESET%:
         elif sys.argv[1].lower() == 'version':
             print(slinn.version)
         else:
-            print(f'{RED}Command {sys.argv[1].lower()} is not exists{RESET}')
+            #print(f'{RED}Command {sys.argv[1].lower()} is not exists{RESET}')
+            subprocess.run([sys.executable, 'manage.py'] + sys.argv[1:])
     else:
         print(f'{RED}Command was not specified{RESET}')
