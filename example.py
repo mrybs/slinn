@@ -1,4 +1,4 @@
-from slinn import AsyncServer, AnyFilter, Response, Address, LinkFilter, ResponseHeader, ResponseChunk, ApiDispatcher
+from slinn import AsyncServer, Response, Address, ResponseHeader, ResponseChunk, ApiDispatcher, SSEHeader, SSEEvent
 import logging
 import os
 import asyncio
@@ -23,6 +23,14 @@ async def gpsl(request):
             await request.respond(ResponseChunk, data)
             await asyncio.sleep(0)
             i += 1
+
+
+@dp.get('sse')
+async def sse(request):
+    await request.respond(SSEHeader, '*')
+    while True:
+        await request.respond(SSEEvent, full_data=['lolkek'], event_id=1488, retry=500, comments=['alikhan daun eblan'], event='да по жизни так')
+        await asyncio.sleep(1)
 
 
 asyncio.run(AsyncServer(dp).listen(Address(8080)))
