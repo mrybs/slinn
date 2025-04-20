@@ -25,6 +25,10 @@ from slinn.http_json_response import HttpJSONResponse
 from slinn.http_json_api_response import HttpJSONAPIResponse
 from slinn.sse_header import SSEHeader
 from slinn.sse_event import SSEEvent
+from slinn.websocket_opcodes import WebSocketOpcodes
+from slinn.websocket_handshake import WebSocketHandshake
+from slinn.websocket_frame import WebSocketFrame
+from slinn.async_websocket_connection import AsyncWebSocketConnection
 from slinn.server import Server
 from slinn.async_server import AsyncServer
 from slinn.api_dispatcher import ApiDispatcher
@@ -35,7 +39,7 @@ VERSION = {
     'name': 'Slinn',
     'codename': 'Nukeful',
     'version': '2.3.1',
-    'version_id': '180425A',
+    'version_id': '210425A',
     'dies_at': datetime(2025, 6, 18, 23, 59)
 }
 version = '{} {} v{} {}'.format(*list(VERSION.values())[:-1])

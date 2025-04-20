@@ -66,6 +66,7 @@ class Request:
         self.method = self.header['method']
         self.version = self.header['ver']
         self.full_link = urllib.parse.unquote_plus(self.header['link'].replace('+', ' '))
+        self.headers = self.header['data']
         self.host = self.header['data']['Host']
         self.user_agent = self.header['data']['User-Agent'] if 'User-Agent' in self.header['data'].keys() else \
             self.header['data']['user-agent']
@@ -91,6 +92,9 @@ class Request:
         if made is None:
             return
         self.connection.sendall(made)
+
+    def recv(self, n_bytes: int) -> bytes:
+        return self.connection.recv(n_bytes)
 
 # def set_cookie(self, response_class, *args, **kwargs):
 # 	self.client_socket.sendall(response_class(*args, **kwargs).make())

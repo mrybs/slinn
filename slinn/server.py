@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Any
 from slinn import Request, Address, Filter, HCDispatcher, FTDispatcher, utils
 import socket
 import ssl
@@ -17,7 +18,7 @@ class Server:
             self.filter = filter
             self.function = function
 
-    def __init__(self, *dispatchers: tuple[Dispatcher, ...], smart_navigation: bool = True, ssl_fullchain: str = None,
+    def __init__(self, *dispatchers: tuple[Any, ...], smart_navigation: bool = True, ssl_fullchain: str = None,
                  # type: ignore
                  ssl_key: str = None, timeout: float = 0.03, max_bytes_per_receive: int = 4096,
                  max_bytes: int = 4294967296, _func=lambda server: None, logger: logging.Logger = logging.getLogger(),

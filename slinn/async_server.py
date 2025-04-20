@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Any
 from slinn import AsyncRequest, Address, Filter, HCDispatcher, FTDispatcher, utils
 import asyncio
 import socket
@@ -20,7 +21,7 @@ class AsyncServer:
             self.filter = filter
             self.function = function
 
-    def __init__(self, *dispatchers: tuple[Dispatcher, ...], smart_navigation: bool = True, ssl_fullchain: str = None,
+    def __init__(self, *dispatchers: tuple[Any, ...], smart_navigation: bool = True, ssl_fullchain: str = None,
                  # type: ignore
                  ssl_key: str = None, timeout: float = 0.03, max_bytes_per_receive: int = 4096,
                  max_bytes: int = 4294967296, _func=lambda server: None, logger: logging.Logger = logging.getLogger(),
@@ -75,7 +76,8 @@ class AsyncServer:
             self.logger.critical(f'Permission denied')
             exit(13)
         if self.ssl:
-            self.ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+            self.ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            self.ssl_context.minimum_version = ssl.TLSVersion.TLSv1_2
             self.ssl_context.load_cert_chain(certfile=self.ssl_cert, keyfile=self.ssl_key)
         self.server_socket.settimeout(self.timeout)
         self.server_socket.listen()
@@ -95,12 +97,36 @@ class AsyncServer:
                 self.server_socket.close()
             os._exit(0)
 
+    @staticmethod
+    async def wait_for_read(sock):
+        await asyncio.get_running_loop().sock_recv(sock, 0)
+
+    @staticmethod
+    async def wait_for_write(sock):
+        await asyncio.get_event_loop().sock_accept(sock)
+
+    @staticmethod
+    async def async_do_handshake(ssl_socket):
+        while True:
+            try:
+                ssl_socket.do_handshake()
+                break
+            except ssl.SSLWantReadError:
+                await AsyncServer.wait_for_read(ssl_socket)
+            except ssl.SSLWantWriteError:
+                await AsyncServer.wait_for_write(ssl_socket)
+
     async def handle_request(self, connection: socket.socket, client_address):
         try:
             self._func(self)
             if self.ssl:
-                connection = self.ssl_context.wrap_socket(connection, server_side=True,
-                                                          do_handshake_on_connect=True, suppress_ragged_eofs=True)
+                connection = self.ssl_context.wrap_socket(
+                    connection,
+                    server_side=True,
+                    do_handshake_on_connect=False,
+                    suppress_ragged_eofs=True
+                )
+                await AsyncServer.async_do_handshake(connection)
             request: AsyncRequest
             try:
                 connection.settimeout(self.timeout)
@@ -156,7 +182,7 @@ class AsyncServer:
                             if await self.answer_request(connection, handle, request, data, header, content):
                                 return
         except Exception as exception:
-            self.logger.warning(f'During handling request, an {exception} has occured')
+            self.logger.warning(f'During handling request, an {exception} has occurred')
             self.logger.warning(traceback.format_exc())
             self.reload(*self.dispatchers)
 

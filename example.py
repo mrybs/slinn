@@ -1,4 +1,4 @@
-from slinn import AsyncServer, Response, Address, ResponseHeader, ResponseChunk, ApiDispatcher, SSEHeader, SSEEvent
+from slinn import AsyncServer, Response, Address, ResponseHeader, ResponseChunk, ApiDispatcher, SSEHeader, SSEEvent, WebSocketHandshake, AsyncWebSocketConnection, WebSocketFrame, WebSocketOpcodes
 import logging
 import os
 import asyncio
@@ -33,4 +33,14 @@ async def sse(request):
         await asyncio.sleep(1)
 
 
-asyncio.run(AsyncServer(dp).listen(Address(8080)))
+@dp.get('ws')
+async def ws(request):
+    conn = AsyncWebSocketConnection(request)
+    await conn.handshake()
+    while frame := await conn.read():
+        if conn.closed:
+            break
+        await conn.send('you have sent: ' + frame.payload.decode())
+
+
+asyncio.run(AsyncServer(dp, ssl_fullchain='localhost.crt', ssl_key='localhost.key').listen(Address(8080)))

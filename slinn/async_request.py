@@ -16,4 +16,6 @@ class AsyncRequest(Request):
         if made is None:
             return
         await self.loop.sock_sendall(self.connection, made)
-        #self.client_socket.sendall(made)
+
+    async def recv(self, n_bytes: int) -> bytes:
+        return await self.loop.sock_recv(self.connection, n_bytes)
