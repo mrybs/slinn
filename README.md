@@ -2,18 +2,18 @@
 
 **Slinn is a HTTPS and HTTP server framework**
 
-![License](https://img.shields.io/github/license/mrybs/slinn)
+![License](https://img.shields.io/github/license/openmiot/slinn)
 
-![GitHub Release](https://img.shields.io/github/v/release/mrybs/slinn)
-![GitHub top language](https://img.shields.io/github/languages/top/mrybs/slinn)
+![GitHub Release](https://img.shields.io/github/v/release/openmiot/slinn)
+![GitHub top language](https://img.shields.io/github/languages/top/openmiot/slinn)
 
-![GitHub Repo stars](https://img.shields.io/github/stars/mrybs/slinn)
-![GitHub watchers](https://img.shields.io/github/watchers/mrybs/slinn)
-![GitHub forks](https://img.shields.io/github/forks/mrybs/slinn)
+![GitHub Repo stars](https://img.shields.io/github/stars/openmiot/slinn)
+![GitHub watchers](https://img.shields.io/github/watchers/openmiot/slinn)
+![GitHub forks](https://img.shields.io/github/forks/openmiot/slinn)
 
-![GitHub commit activity](https://img.shields.io/github/commits-since/mrybs/slinn/latest)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/w/mrybs/slinn)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/t/mrybs/slinn)
+![GitHub commit activity](https://img.shields.io/github/commits-since/openmiot/slinn/latest)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/openmiot/slinn)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/t/openmiot/slinn)
 
 
 ### Simple example
